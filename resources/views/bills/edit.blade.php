@@ -1,0 +1,157 @@
+@extends('layouts-verticalmenu-light.master')
+@section('css')
+
+@endsection
+@section('content')
+
+<!-- Page Header -->
+<div class="page-header">
+    <div>
+        <h2 class="main-content-title tx-24 mg-b-5">Edit bill</h2>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('bills.index') }}"> Bill</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Edit</li>
+        </ol>
+    </div>
+</div>
+<!-- End Page Header -->
+
+<!-- Row -->
+<div class="row row-sm">
+    <div class="col-lg-12 col-md-12">
+        <div class="card custom-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <h6 class="main-content-label">Bills Details</h6>
+                </div>
+                <form class="parsley-validate" method="post" action="{{ route('bills.update', $bill->id) }}" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+                    <div class="row row-sm">
+                        <div class="col-md-6">
+                            <label for="">Type <span class="text-danger">*</span> </label>
+                            <input class="form-control" type="text" name="type" id="type" value="{{ old('type', $bill->type) }}" required="">
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="">Land <span class="text-danger">*</span></label>
+                                <select class="form-control select2" name="land_id" id="land_id" required="">
+                                    <option value="">Select land</option>
+                                    @if(isset($lands) && !empty($lands))
+                                        @foreach($lands as $id => $name)
+                                            <option value="{{ $id }}" {{ isset($bill->land_id) && $bill->land_id == $id ? 'selected' : '' }}>{{ $name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                @error('land_id') <ul class="parsley-errors-list filled"> <li class="parsley-required">{{ $message }}</li> </ul> @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="date">Period start </label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <i class="fe fe-calendar lh--9 op-6"></i>
+                                        </div>
+                                    </div>
+                                    <input class="form-control datepicker" placeholder="DD-MM-YYYY" type="text" name="period_start" id="period_start" value="{{ $bill->period_start != NULL ? date('d-m-Y', strtotime($bill->period_start)) : '' }}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="date">Period end</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <i class="fe fe-calendar lh--9 op-6"></i>
+                                        </div>
+                                    </div>
+                                    <input class="form-control datepicker" placeholder="DD-MM-YYYY" type="text" name="period_end" id="period_end" value="{{ $bill->period_end != NULL ? date('d-m-Y', strtotime($bill->period_end)) : '' }}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="">Amount <span class="text-danger">*</span></label>
+                                <input class="form-control" name="amount" type="text" value="{{ old('amount', $bill->amount) }}" onkeypress="return onlyDecimal(event)">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="">Payment person </label>
+                                <input class="form-control" name="payment_person" type="text" value="{{ old('payment_person', $bill->payment_person) }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="date">Due date</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <i class="fe fe-calendar lh--9 op-6"></i>
+                                        </div>
+                                    </div>
+                                    <input class="form-control datepicker" placeholder="DD-MM-YYYY" type="text" name="due_date" id="due_date" value="{{ $bill->due_date != NULL ? date('d-m-Y', strtotime($bill->due_date)) : '' }}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="">Image</label>
+                                <input class="form-control" name="image" type="file" accept="image/*">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="">Status </label>
+                            <div class="custom-radio-div">
+                                <label class="rdiobox d-inline-block mr-4" for="unpaid"><input type="radio" class="type" name="status" value="0" id="unpaid" checked> <span>Unpaid</span></label>
+                                <label class="rdiobox d-inline-block" for="paid"><input type="radio" class="type" name="status" value="1" id="paid"> <span>Paid</span></label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row row-sm mt-4">
+                        <div class="col-md-12 col-lg-12 col-xl-12">
+                            <a href="{{ route('water.index') }}" class="btn btn-primary">Back</a>
+                            <button type="submit" class="btn ripple btn-main-primary">Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Row -->
+
+@endsection
+
+@section('script')
+
+<script>
+    $(document).ready(function() {
+        $("#global-loader").fadeOut("slow");
+    });
+
+    $(function() {
+        $('#period_start').datepicker({
+            changeMonth: true,
+            changeYear: true,
+            dateFormat: "dd-mm-yy"
+        });
+
+        $('#period_end').datepicker({
+            changeMonth: true,
+            changeYear: true,
+            dateFormat: "dd-mm-yy"
+        });
+
+        $('#due_date').datepicker({
+            changeMonth: true,
+            changeYear: true,
+            dateFormat: "dd-mm-yy"
+        });
+    });
+</script>
+@endsection
