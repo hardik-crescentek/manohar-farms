@@ -18,8 +18,17 @@ class PlantsController extends Controller
             $plants = Plant::orderBy('id', 'desc')->get();
             $totalPlants = Plant::count();
 
+             // Group by plant name and calculate the total quantity for each category
+            $categoryPlants = $plants->groupBy('name')->map(function ($group) {
+                return [
+                    'name' => $group->first()->name,
+                    'total_quantity' => $group->sum('quantity'),
+                ];
+            })->values();
+
             $data['totalPlants'] = $totalPlants;
             $data['plants'] = $plants;
+            $data['category_plants'] = $categoryPlants;
 
             return response()->json(['status' => 200, 'data' => $data], 200);
         } catch (\Exception $e) {
