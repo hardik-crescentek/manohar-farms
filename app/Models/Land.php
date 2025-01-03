@@ -23,7 +23,18 @@ class Land extends Model
 
     protected $dates = ['deleted_at', 'created_at', 'updated_at'];
 
-    public function plant() {
+    public function plant()
+    {
         return $this->belongsTo(Plant::class);
     }
+
+    public function waterEntries()
+    {
+        return $this->hasMany(WaterEntry::class, 'land_id');
+    }
+
+    public function fertilizerEntries()
+{
+    return $this->hasMany(FertilizerEntry::class, 'land_id');
+}
 }

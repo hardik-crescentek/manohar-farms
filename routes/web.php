@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\VehiclesController;
 use App\Http\Controllers\Admin\WaterController;
 use App\Http\Controllers\Admin\BoreWellsController;
 use App\Http\Controllers\Admin\FilterHistoryController;
+use App\Http\Controllers\Admin\MiscellaneousController;
 use App\Http\Controllers\Admin\NotificationSettingsController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\TaskController;
@@ -69,17 +70,19 @@ Route::middleware('guest')->group(function () {
 Route::post('/save-token', [Controller::class, 'saveToken'])->name('save-token');
 Route::get('/send-notification', [Controller::class, 'sendNotification'])->name('send.notification');
 
-Route::get('/test', function() {
-    
+Route::get('/test', function () {
+
     echo "test";
 });
 
-Route::group(['middleware' => ['auth']], function() {
+Route::group(['middleware' => ['auth']], function () {
 
     Route::get('/sync-permissions', [DashboardController::class, 'syncPermissions']);
 
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
-    Route::get('/', function() { return redirect()->route('dashboard'); });
+    Route::get('/', function () {
+        return redirect()->route('dashboard');
+    });
 
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -91,6 +94,9 @@ Route::group(['middleware' => ['auth']], function() {
 
     // Plants
     Route::resource('plants', PlantsController::class)->middleware('role_or_permission:super-admin|plants-view');
+
+    // Miscellaneous
+    Route::resource('miscellaneous', MiscellaneousController::class)->middleware('role_or_permission:super-admin|miscellaneous-view');
 
     // Fertilizer Pesticides
     Route::resource('fertilizer-pesticides', FertilizerPesticidesController::class)->middleware('role_or_permission:super-admin|fertilizer-pesticides-view');
@@ -163,8 +169,14 @@ Route::group(['middleware' => ['auth']], function() {
     Route::put('land-parts/update/{land}', [LandsController::class, 'updatePart'])->name('land-parts.update')->middleware('role_or_permission:super-admin|lands-edit');
 
     Route::get('land-parts/details/{id}', [LandsController::class, 'landPartDetails'])->name('land-parts.details');
+
     Route::post('land-parts/save-water-entries', [LandsController::class, 'saveWaterEntries'])->name('land-parts.save-water-entries');
     Route::post('water-entries/get-table', [LandsController::class, 'getWatersTable'])->name('water-entries.get-table');
+
+    // Jivamrut Entires code
+
+    Route::post('land-parts/save-jivamrut-entries', [LandsController::class, 'saveJivamrutEntries'])->name('land-parts.save-jivamrut-entries');
+    Route::post('jivamrut-entries/get-table', [LandsController::class, 'getJivamrutTable'])->name('jivamrut-entries.get-table');
 
     Route::post('land-parts/save-fertilizer-entries', [LandsController::class, 'saveFertilizerEntries'])->name('land-parts.save-fertilizer-entries');
     Route::post('fertilizer-entries/get-table', [LandsController::class, 'getFertilizerTable'])->name('fertilizer-entries.get-table');
@@ -256,16 +268,25 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('reports/infrastructure', [ReportsController::class, 'infrastructureIndex'])->name('infrastructure-reports.index');
     Route::post('infrastructure/get-table', [ReportsController::class, 'getInfrastructureTable'])->name('infrastructure-reports.get-table');
     Route::post('infrastructure/generate-infrastructure-pdf', [ReportsController::class, 'generateInfrastructurePdf'])->name('infrastructure-reports.generate-pdf');
+
+    // Plot report routes
+
+    Route::get('reports/plot', [ReportsController::class, 'plotIndex'])->name('plot-reports.index');
+    Route::post('plot/get-table', [ReportsController::class, 'getPlotTable'])->name('plot-reports.get-table');
+    Route::post('plot/generate-plot-pdf', [ReportsController::class, 'generatePlotPdf'])->name('plot-reports.generate-pdf');
+
 });
 
 
 Route::get('plants/reports', [ReportsController::class, 'plantIndex'])->name('plants-reports.index');
 
 // manage Cowshed
-Route::group(['middleware' => ['auth'], 'prefix' => 'cowshed', 'as' => 'cowshed.'], function() {
+Route::group(['middleware' => ['auth'], 'prefix' => 'cowshed', 'as' => 'cowshed.'], function () {
 
     Route::get('/dashboard', [CowshedDashboardController::class, 'dashboard'])->name('dashboard');
-    Route::get('/', function() { return redirect()->route('dashboard'); });
+    Route::get('/', function () {
+        return redirect()->route('dashboard');
+    });
 
     Route::get('settings', [SettingsController::class, 'settings'])->name('settings');
     Route::post('settings/update/{setting}', [SettingsController::class, 'update'])->name('settings.update');
@@ -300,7 +321,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'cowshed', 'as' => 'cowshed.
     Route::post('daily-milk/get-delivery-pdf', [MilkController::class, 'getDeliveryPdf'])->name('daily-milk.get-delivery-pdf');
     Route::post('daily-milk/update', [MilkController::class, 'updateDailyDelivery'])->name('daily-milk.update');
 
-    Route::post('daily-milk/save-entry', [MilkController::class,'saveInHouseDelivery'])->name('daily-milk.save-inhouse-delivery');
+    Route::post('daily-milk/save-entry', [MilkController::class, 'saveInHouseDelivery'])->name('daily-milk.save-inhouse-delivery');
 
     // milk-payments
     Route::get('milk-payments', [MilkController::class, 'milkPaymentsIndex'])->name('milk-payments.index');

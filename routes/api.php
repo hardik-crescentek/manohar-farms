@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\FertilizerEntryController;
 use App\Http\Controllers\Api\FertilizerPesticidesController;
 use App\Http\Controllers\Api\LandsController;
 use App\Http\Controllers\Api\MapsController;
+use App\Http\Controllers\Api\MiscellaneousController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PlantsController;
 use App\Http\Controllers\Api\ReportsController;
@@ -34,7 +35,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
 });
 
-Route::group(['middleware' => ['auth:sanctum']], function() {
+Route::group(['middleware' => ['auth:sanctum']], function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
 
@@ -52,6 +53,12 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::resource('lands', LandsController::class);
     Route::resource('bills', BillsController::class);
     Route::resource('expenses', ExpensesController::class);
+    // Miscellaneous
+    Route::resource('miscellaneous', MiscellaneousController::class);
+
+    // Plant Name Wise Api
+    Route::post('plants/category', [PlantsController::class, 'getPlantsByCategory']);
+
 
     Route::post('vehicles/delete-document', [VehiclesController::class, 'deleteDocument']);
 
