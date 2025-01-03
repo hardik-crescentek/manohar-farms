@@ -57,20 +57,20 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // Miscellaneous
     Route::resource('miscellaneous', MiscellaneousController::class);
 
-    // Plant Name Wise Api
-    Route::post('plants/category', [PlantsController::class, 'getPlantsByCategory']);
-
-
     Route::post('vehicles/delete-document', [VehiclesController::class, 'deleteDocument']);
 
     Route::post('land-parts/save-water', [LandsController::class, 'saveWater']);
     Route::get('land-parts/get-water/{id}', [LandsController::class, 'getWaterLandPartWise']);
+    Route::delete('land-parts/delete-water/{id}', [LandsController::class, 'destroyWaterLandPartWise']);
+
 
     Route::post('fertilizer-entries/save', [FertilizerEntryController::class, 'saveFertilizerEntry']);
     Route::get('fertilizer-entries/plot-wise/{id}', [FertilizerEntryController::class, 'getFertilizerPlotWise']);
 
-    Route::post('jivamrut -entries/save', [JivamrutEntryController::class, 'saveJivamrutEntry']);
-    Route::get('jivamrut -entries/plot-wise/{id}', [JivamrutEntryController::class, 'getJivamrutPlotWise']);
+    Route::post('jivamrut-entries/save', [JivamrutEntryController::class, 'saveJivamrutEntry']);
+    Route::get('jivamrut-entries/plot-wise/{id}', [JivamrutEntryController::class, 'getJivamrutPlotWise']);
+    Route::put('jivamrut-entries/update/{id}', [JivamrutEntryController::class, 'updateJivamrutEntry']);
+    Route::delete('jivamrut-entries/delete/{id}', [JivamrutEntryController::class, 'destroyJivamrutEntry']);
 
     Route::get('reports/get-report', [ReportsController::class, 'getReport']);
     Route::get('reports/get-home-report', [ReportsController::class, 'getHomeReport']);
