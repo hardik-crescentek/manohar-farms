@@ -293,55 +293,61 @@
 
 
     {{-- fertilizer Entries Start --}}
-
     <div class="row row-sm">
         <div class="col-lg-12 col-md-12">
             <div class="card custom-card overflow-hidden">
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-2">
-                        <h6 class="main-content-label">Fertilizer</h6>
+                        <h6 class="main-content-label">Fertilizer Entries</h6>
                         <a href="javascript:;" class="btn btn-primary" data-target="#addFertilizerEntry"
-                            data-toggle="modal">Add Fertilizer entry</a>
+                            data-toggle="modal">Add Fertilizer Entry</a>
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-bordered datatable" id="flush-table" style="width:100%">
+                        <table class="table table-bordered datatable" id="fertilizer-table" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>Id</th>
                                     <th>Valves</th>
+                                    <th>Fertilizer Name</th>
+                                    <th>Quantity</th>
                                     <th>Date</th>
+                                    <th>Time</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($flushHistory as $history)
-                                    <tr class="tr-{{ $history->id }}">
-                                        <td>{{ $history->id }}</td>
-                                        <td>{{ implode(', ', $history->landPartNames()) }}</td>
-                                        <td>{{ $history->date->format('d-m-Y') }}</td>
+                                @foreach ($PlotFertilizer as $entry)
+                                    <tr class="tr-{{ $entry->id }}">
+                                        <td>{{ $entry->id }}</td>
+                                        <td>{{ implode(', ', $entry->landPartNames()) }}</td>
+                                        <td>{{ $entry->fertilizer_name }}</td>
+                                        <td>{{ $entry->quantity }}</td>
+                                        <td>{{ $entry->date->format('d-m-Y') }}</td>
+                                        <td>{{ $entry->time }}</td>
                                         <td>
                                             <a href="javascript:;" title="Edit"
-                                                data-target="#editFlushHistory{{ $history->id }}" data-toggle="modal">
-                                                <i class="fa fa-pen text-primary mr-2"></i> </a>
+                                                data-target="#editFertilizerEntry{{ $entry->id }}" data-toggle="modal">
+                                                <i class="fa fa-pen text-primary mr-2"></i>
+                                            </a>
 
-                                            <div class="modal editFlushHistory" id="editFlushHistory{{ $history->id }}">
+                                            <div class="modal editFertilizerEntry" id="editFertilizerEntry{{ $entry->id }}">
                                                 <div class="modal-dialog" role="document">
                                                     <div class="modal-content modal-content-demo">
                                                         <div class="modal-header">
-                                                            <h6 class="modal-title">Edit Flush History</h6><button
-                                                                aria-label="Close" class="close" data-dismiss="modal"
+                                                            <h6 class="modal-title">Edit Fertilizer Entry</h6>
+                                                            <button aria-label="Close" class="close" data-dismiss="modal"
                                                                 type="button"><span
                                                                     aria-hidden="true">&times;</span></button>
                                                         </div>
                                                         <form class="parsley-validate" method="post"
-                                                            action="{{ route('flush-history.update', $history->id) }}"
+                                                            action="{{ route('plot-fertilizer.update', $entry->id) }}"
                                                             enctype="multipart/form-data">
                                                             @csrf
                                                             @method('put')
                                                             <div class="modal-body">
                                                                 <div class="row row-sm">
                                                                     <input type="hidden" name="land_id"
-                                                                        value="{{ $history->land_id }}">
+                                                                        value="{{ $entry->land_id }}">
                                                                     <div class="col-md-12">
                                                                         <p class="mg-b-10">Valves</p>
                                                                         <select class="form-control select2"
@@ -349,11 +355,28 @@
                                                                             @if (isset($landParts) && !$landParts->isEmpty())
                                                                                 @foreach ($landParts as $key => $item)
                                                                                     <option value="{{ $item->id }}"
-                                                                                        {{ $history->land_part_id != null && in_array($item->id, $history->land_part_id) ? 'selected' : '' }}>
-                                                                                        {{ $item->name }} </option>
+                                                                                        {{ $entry->land_part_id != null && in_array($item->id, $entry->land_part_id) ? 'selected' : '' }}>
+                                                                                        {{ $item->name }}</option>
                                                                                 @endforeach
                                                                             @endif
                                                                         </select>
+                                                                    </div>
+                                                                    <div class="col-md-12">
+                                                                        <div class="form-group">
+                                                                            <label for="fertilizer_name">Fertilizer Name</label>
+                                                                            <input type="text" class="form-control"
+                                                                                name="fertilizer_name"
+                                                                                value="{{ $entry->fertilizer_name }}"
+                                                                                required>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-12">
+                                                                        <div class="form-group">
+                                                                            <label for="quantity">Quantity</label>
+                                                                            <input type="number" class="form-control"
+                                                                                name="quantity"
+                                                                                value="{{ $entry->quantity }}" required>
+                                                                        </div>
                                                                     </div>
                                                                     <div class="col-md-12">
                                                                         <div class="form-group">
@@ -361,16 +384,23 @@
                                                                             <div class="input-group">
                                                                                 <div class="input-group-prepend">
                                                                                     <div class="input-group-text">
-                                                                                        <i
-                                                                                            class="fe fe-calendar lh--9 op-6"></i>
+                                                                                        <i class="fe fe-calendar lh--9 op-6"></i>
                                                                                     </div>
                                                                                 </div>
                                                                                 <input class="form-control datepicker"
-                                                                                    placeholder="DD/MM/YYYY"
-                                                                                    type="text" name="date"
-                                                                                    id="editFlushdate"
-                                                                                    value="{{ isset($history->date) && $history->date != null ? date('d-m-Y', strtotime($history->date)) : '' }}">
+                                                                                    placeholder="DD/MM/YYYY" type="text"
+                                                                                    name="date"
+                                                                                    value="{{ isset($entry->date) ? $entry->date->format('d-m-Y') : '' }}"
+                                                                                    required>
                                                                             </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-12">
+                                                                        <div class="form-group">
+                                                                            <label for="time">Time</label>
+                                                                            <input type="time" class="form-control"
+                                                                                name="time"
+                                                                                value="{{ $entry->time }}" required>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -378,17 +408,17 @@
                                                             <div class="modal-footer">
                                                                 <button class="btn ripple btn-primary" type="submit">Save
                                                                     changes</button>
-                                                                <button class="btn ripple btn-secondary"
-                                                                    data-dismiss="modal" type="button">Close</button>
+                                                                <button class="btn ripple btn-secondary" data-dismiss="modal"
+                                                                    type="button">Close</button>
                                                             </div>
                                                         </form>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <a href="javascript:;" class="delete-land-part"
-                                                data-id="{{ $history->id }}"
-                                                data-route="{{ route('flush-history.destroy', $history->id) }}"
+                                            <a href="javascript:;" class="delete-fertilizer-entry"
+                                                data-id="{{ $entry->id }}"
+                                                data-route="{{ route('plot-fertilizer.destroy', $entry->id) }}"
                                                 data-toggle="tooltip" title="Delete">
                                                 <i class="fa fa-trash text-danger"></i>
                                             </a>
@@ -397,12 +427,12 @@
                                 @endforeach
                             </tbody>
                         </table>
-
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 
     {{-- fertilizer Entries End --}}
 
@@ -578,10 +608,12 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content modal-content-demo">
                 <div class="modal-header">
-                    <h6 class="modal-title">Add Fertilizer entry</h6><button aria-label="Close" class="close"
-                        data-dismiss="modal" type="button"><span aria-hidden="true">&times;</span></button>
+                    <h6 class="modal-title">Add Fertilizer Entry</h6>
+                    <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-                <form class="parsley-validate" method="post" action="{{ route('flush-history.store') }}"
+                <form class="parsley-validate" method="post" action="{{ route('plot-fertilizer.store') }}"
                     enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
@@ -599,6 +631,20 @@
                             </div>
                             <div class="col-md-12">
                                 <div class="form-group">
+                                    <label for="fertilizer_name">Fertilizer Name</label>
+                                    <input type="text" class="form-control" name="fertilizer_name"
+                                        id="fertilizer_name" placeholder="Enter fertilizer name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="quantity">Quantity</label>
+                                    <input type="number" class="form-control" name="quantity" id="quantity"
+                                        placeholder="Enter quantity" required>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
                                     <label for="date">Date</label>
                                     <div class="input-group">
                                         <div class="input-group-prepend">
@@ -611,6 +657,12 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="time">Time</label>
+                                    <input type="text" class="form-control" name="time" id="time" required>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -621,6 +673,7 @@
             </div>
         </div>
     </div>
+
     {{-- End Model --}}
 
     <div class="modal" id="addFlushEntry">
@@ -727,6 +780,42 @@
                         }
                     });
             });
+
+            // Plot Fertilizer delete
+            $('.datatable').on('click', '.delete-fertilizer-entry', function() {
+                var route = $(this).data('route');
+                var id = $(this).data('id');
+                swal({
+                        title: "Are you sure?",
+                        text: "You will not be able to recover this data!",
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonClass: "btn-danger",
+                        confirmButtonText: "Yes, delete it!",
+                        cancelButtonText: "Cancel",
+                        closeOnConfirm: false,
+                        closeOnCancel: false
+                    },
+                    function(isConfirm) {
+                        if (isConfirm) {
+                            $.ajax({
+                                url: route,
+                                type: 'POST',
+                                data: {
+                                    _token: '{{ csrf_token() }}',
+                                    _method: 'DELETE'
+                                },
+                                success: function() {
+                                    swal("Deleted!", "Your data has been deleted.",
+                                        "success");
+                                    $(".tr-" + id).remove();
+                                }
+                            });
+                        } else {
+                            swal("Cancelled", "Your data is safe :)", "error");
+                        }
+                    });
+            });
         });
 
         $('.datatable').DataTable({
@@ -754,6 +843,22 @@
         });
 
         $('.editFlushHistory').on('shown.bs.modal', function() {
+            $(this).find('.datepicker').datepicker({
+                changeMonth: true,
+                changeYear: true,
+                dateFormat: "dd-mm-yy"
+            });
+        });
+
+        $('#addFertilizerEntry').on('shown.bs.modal', function() {
+            $(this).find('.datepicker').datepicker({
+                changeMonth: true,
+                changeYear: true,
+                dateFormat: "dd-mm-yy"
+            });
+        });
+
+        $('.editFertilizerEntry').on('shown.bs.modal', function() {
             $(this).find('.datepicker').datepicker({
                 changeMonth: true,
                 changeYear: true,

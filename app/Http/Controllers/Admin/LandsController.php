@@ -9,6 +9,7 @@ use App\Models\JivamrutEntry;
 use App\Models\Land;
 use App\Models\LandPart;
 use App\Models\Plant;
+use App\Models\PlotFertilizer;
 use App\Models\Water;
 use App\Models\WaterEntry;
 use Illuminate\Http\Request;
@@ -186,6 +187,10 @@ class LandsController extends Controller
         // Flush history
         $flushHistory = FlushHistory::where('land_id', $id)->get();
         $data['flushHistory'] = $flushHistory;
+
+        // Plot Fertilizer history
+        $PlotFertilizer = PlotFertilizer::where('land_id', $id)->get();
+        $data['PlotFertilizer'] = $PlotFertilizer;
 
         // Fetch the latest water entry
         $latestEntry = WaterEntry::where('land_id', $id)

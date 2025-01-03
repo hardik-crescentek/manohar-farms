@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\DieselManagementController;
 use App\Http\Controllers\Api\ExpensesController;
 use App\Http\Controllers\Api\FertilizerEntryController;
 use App\Http\Controllers\Api\FertilizerPesticidesController;
+use App\Http\Controllers\Api\JivamrutEntryController;
 use App\Http\Controllers\Api\LandsController;
 use App\Http\Controllers\Api\MapsController;
 use App\Http\Controllers\Api\MiscellaneousController;
@@ -67,6 +68,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     Route::post('fertilizer-entries/save', [FertilizerEntryController::class, 'saveFertilizerEntry']);
     Route::get('fertilizer-entries/plot-wise/{id}', [FertilizerEntryController::class, 'getFertilizerPlotWise']);
+
+    Route::post('jivamrut -entries/save', [JivamrutEntryController::class, 'saveJivamrutEntry']);
+    Route::get('jivamrut -entries/plot-wise/{id}', [JivamrutEntryController::class, 'getJivamrutPlotWise']);
 
     Route::get('reports/get-report', [ReportsController::class, 'getReport']);
     Route::get('reports/get-home-report', [ReportsController::class, 'getHomeReport']);

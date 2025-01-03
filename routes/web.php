@@ -25,6 +25,7 @@ use App\Http\Controllers\Admin\FilterHistoryController;
 use App\Http\Controllers\Admin\MiscellaneousController;
 use App\Http\Controllers\Admin\NotificationSettingsController;
 use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Admin\PlotFertilizerController;
 use App\Http\Controllers\Admin\TaskController;
 use App\Http\Controllers\Admin\VermiCompostController;
 use App\Http\Controllers\Controller;
@@ -184,6 +185,11 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('flush-history/store', [FlushHistoryController::class, 'store'])->name('flush-history.store');
     Route::put('flush-history/update/{flushHistory}', [FlushHistoryController::class, 'update'])->name('flush-history.update');
     Route::delete('flush-history/destroy/{flushHistory}', [FlushHistoryController::class, 'destroy'])->name('flush-history.destroy');
+
+    // Plot Fertilizer Routes
+    Route::post('plot-fertilizer/store', [PlotFertilizerController::class, 'store'])->name('plot-fertilizer.store');
+    Route::put('plot-fertilizer/update/{plotFertilizer}', [PlotFertilizerController::class, 'update'])->name('plot-fertilizer.update');
+    Route::delete('plot-fertilizer/destroy/{plotFertilizer}', [PlotFertilizerController::class, 'destroy'])->name('plot-fertilizer.destroy');
 
     // Water Managements
     Route::resource('water', WaterController::class)->middleware('role_or_permission:super-admin|water-view');
