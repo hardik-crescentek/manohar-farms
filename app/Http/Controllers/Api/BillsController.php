@@ -65,7 +65,7 @@ class BillsController extends Controller
                 'period_start' => date('Y-m-d', strtotime($request->period_start)),
                 'period_end' => date('Y-m-d', strtotime($request->period_end)),
                 'due_date' => date('Y-m-d', strtotime($request->due_date)),
-                'status' => $request->status
+                'status' => $request->status ?? 0
             ]);
 
             if ($createBill) {
