@@ -9,8 +9,10 @@ use App\Http\Controllers\Api\DieselManagementController;
 use App\Http\Controllers\Api\ExpensesController;
 use App\Http\Controllers\Api\FertilizerEntryController;
 use App\Http\Controllers\Api\FertilizerPesticidesController;
+use App\Http\Controllers\Api\JivamrutEntryController;
 use App\Http\Controllers\Api\LandsController;
 use App\Http\Controllers\Api\MapsController;
+use App\Http\Controllers\Api\MiscellaneousController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PlantsController;
 use App\Http\Controllers\Api\ReportsController;
@@ -34,7 +36,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
 });
 
-Route::group(['middleware' => ['auth:sanctum']], function() {
+Route::group(['middleware' => ['auth:sanctum']], function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
 
@@ -52,6 +54,12 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::resource('lands', LandsController::class);
     Route::resource('bills', BillsController::class);
     Route::resource('expenses', ExpensesController::class);
+    // Miscellaneous
+    Route::resource('miscellaneous', MiscellaneousController::class);
+
+    // Plant Name Wise Api
+    Route::post('plants/category', [PlantsController::class, 'getPlantsByCategory']);
+
 
     Route::post('vehicles/delete-document', [VehiclesController::class, 'deleteDocument']);
 
@@ -60,6 +68,9 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     Route::post('fertilizer-entries/save', [FertilizerEntryController::class, 'saveFertilizerEntry']);
     Route::get('fertilizer-entries/plot-wise/{id}', [FertilizerEntryController::class, 'getFertilizerPlotWise']);
+
+    Route::post('jivamrut -entries/save', [JivamrutEntryController::class, 'saveJivamrutEntry']);
+    Route::get('jivamrut -entries/plot-wise/{id}', [JivamrutEntryController::class, 'getJivamrutPlotWise']);
 
     Route::get('reports/get-report', [ReportsController::class, 'getReport']);
     Route::get('reports/get-home-report', [ReportsController::class, 'getHomeReport']);

@@ -54,7 +54,6 @@ class BillsController extends Controller
     {
         $request->validate([
             'type' => 'required',
-            'land_id' => 'required',
             'amount' => 'required'
         ]);
 
@@ -111,7 +110,6 @@ class BillsController extends Controller
     {
         $request->validate([
             'type' => 'required',
-            'land_id' => 'required',
             'amount' => 'required'
         ]);
 
@@ -130,11 +128,11 @@ class BillsController extends Controller
             $bill = Bill::where('id', $id)->first();
 
             if(isset($bill->image) && $bill->image != null) {
-    
+
                 $fileName = fileUpload('bills', $request->image, $bill->image);
-    
+
             } else {
-    
+
                 $fileName = fileUpload('bills', $request->image);
             }
 

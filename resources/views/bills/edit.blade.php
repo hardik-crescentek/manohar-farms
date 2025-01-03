@@ -35,8 +35,8 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="">Land <span class="text-danger">*</span></label>
-                                <select class="form-control select2" name="land_id" id="land_id" required="">
+                                <label class="">Land </label>
+                                <select class="form-control select2" name="land_id" id="land_id">
                                     <option value="">Select land</option>
                                     @if(isset($lands) && !empty($lands))
                                         @foreach($lands as $id => $name)
@@ -76,7 +76,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="">Amount <span class="text-danger">*</span></label>
-                                <input class="form-control" name="amount" type="text" value="{{ old('amount', $bill->amount) }}" onkeypress="return onlyDecimal(event)">
+                                <input class="form-control" name="amount" type="text" value="{{ old('amount', $bill->amount) }}" onkeypress="return onlyDecimal(event)" required="">
                             </div>
                         </div>
                         <div class="col-md-6">

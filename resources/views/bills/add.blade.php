@@ -33,8 +33,8 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="">Land <span class="text-danger">*</span></label>
-                                <select class="form-control select2" name="land_id" id="land_id" required="">
+                                <label class="">Land</label>
+                                <select class="form-control select2" name="land_id" id="land_id">
                                     <option value="">Select land</option>
                                     @if(isset($lands) && !empty($lands))
                                         @foreach($lands as $id => $name)

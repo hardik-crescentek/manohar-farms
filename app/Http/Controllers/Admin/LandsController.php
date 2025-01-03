@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\FertilizerEntry;
 use App\Models\FlushHistory;
+use App\Models\JivamrutEntry;
 use App\Models\Land;
 use App\Models\LandPart;
 use App\Models\Plant;
+use App\Models\PlotFertilizer;
 use App\Models\Water;
 use App\Models\WaterEntry;
 use Illuminate\Http\Request;
@@ -70,7 +72,7 @@ class LandsController extends Controller
             'pipeline' => $request->pipeline
         ]);
 
-        if($createLand) {
+        if ($createLand) {
             return redirect()->route('lands.index')->with(['success' => true, 'message' => 'Land added successfully!']);
         } else {
             return redirect()->route('lands.index')->with(['error'  => true, 'message' => 'Something went wrong!']);
@@ -116,15 +118,14 @@ class LandsController extends Controller
             'pipeline' => $request->pipeline
         ]);
 
-        if($request->hasFile('image')){
+        if ($request->hasFile('image')) {
             $land = Land::where('id', $id)->first();
 
-            if(isset($land->image) && $land->image != null) {
-    
+            if (isset($land->image) && $land->image != null) {
+
                 $fileName = fileUpload('lands', $request->image, $land->image);
-    
             } else {
-    
+
                 $fileName = fileUpload('lands', $request->image);
             }
 
@@ -132,7 +133,7 @@ class LandsController extends Controller
             $land->save();
         }
 
-        if($updateLand) {
+        if ($updateLand) {
             return redirect()->route('lands.index')->with(['success' => true, 'message' => 'Land updated successfully!']);
         } else {
             return redirect()->route('lands.index')->with(['error'  => true, 'message' => 'Something went wrong!']);
@@ -146,42 +147,76 @@ class LandsController extends Controller
     {
         $deleteLand = Land::where('id', $id)->delete();
 
-        if($deleteLand) {
+        if ($deleteLand) {
             return response()->json(['status' => true, 'message' => 'Success', 'data' => []], 200);
         } else {
             return response()->json(['status' => false, 'message' => 'Error', 'data' => []], 201);
         }
     }
 
-    public function landMaps(Request $request, $id) {
-
-        // $totalWaterUsed = WaterEntry::where('land_id', $id)->sum('volume');
+    public function landMaps(Request $request, $id)
+    {
+        // Total water used (in hours)
         $totalWaterUsed = WaterEntry::where('land_id', $id)->sum('hours');
         $data['totalWaterUsed'] = $totalWaterUsed;
 
-        // $currentMonthWaterUsed = WaterEntry::where('land_id', $id)->whereMonth('date', date('m'))->sum('volume');
-        $currentMonthWaterUsed = WaterEntry::where('land_id', $id)->whereMonth('date', date('m'))->sum('hours');
+        // Current month's water usage
+        $currentMonthWaterUsed = WaterEntry::where('land_id', $id)
+            ->whereMonth('date', date('m'))
+            ->sum('hours');
         $data['currentMonthWaterUsed'] = $currentMonthWaterUsed;
 
+        // Total water expense
         $totalWaterExpense = Water::where('land_id', $id)->sum('price');
         $data['totalWaterExpense'] = $totalWaterExpense;
 
-        $currentMonthWaterExpense = Water::where('land_id', $id)->whereMonth('date', date('m'))->sum('price');
+        // Current month's water expense
+        $currentMonthWaterExpense = Water::where('land_id', $id)
+            ->whereMonth('date', date('m'))
+            ->sum('price');
         $data['currentMonthWaterExpense'] = $currentMonthWaterExpense;
 
+        // Land details
         $land = Land::where('id', $id)->first();
         $data['land'] = $land;
 
+        // Land parts
         $landParts = LandPart::where('land_id', $id)->get();
         $data['landParts'] = $landParts;
-        
+
+        // Flush history
         $flushHistory = FlushHistory::where('land_id', $id)->get();
         $data['flushHistory'] = $flushHistory;
 
+        // Plot Fertilizer history
+        $PlotFertilizer = PlotFertilizer::where('land_id', $id)->get();
+        $data['PlotFertilizer'] = $PlotFertilizer;
+
+        // Fetch the latest water entry
+        $latestEntry = WaterEntry::where('land_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if ($latestEntry) {
+            // Include additional related details (land part and valve)
+            $latestLandPart = LandPart::find($latestEntry->land_part_id);
+            $data['latestEntry'] = [
+                'entry' => $latestEntry,
+                'landPartName' => $latestLandPart ? $latestLandPart[0]->name : 'Unknown',
+                'formattedTime' => $latestEntry->formatted_time, // Using the accessor
+            ];
+        } else {
+            $data['latestEntry'] = null;
+        }
+
+        // dd($data);
         return view('lands.maps', $data);
     }
 
-    public function saveDocuments(Request $request) {
+
+
+    public function saveDocuments(Request $request)
+    {
 
         $request->validate([
             'file' => 'required|mimes:pdf', // Adjust the allowed file types and size
@@ -204,7 +239,8 @@ class LandsController extends Controller
         return response()->json(['error' => 'No file provided'], 400);
     }
 
-    public function storeLandPart(Request $request) {
+    public function storeLandPart(Request $request)
+    {
 
         $fileName = fileUpload('land_parts', $request->image);
 
@@ -216,14 +252,15 @@ class LandsController extends Controller
             'color' => $request->color
         ]);
 
-        if($createLandPart) {
+        if ($createLandPart) {
             return redirect()->route('lands.maps', $request->land_id)->with(['success' => true, 'message' => 'Land part added successfully!']);
         } else {
             return redirect()->route('lands.maps', $request->land_id)->with(['error'  => true, 'message' => 'Something went wrong!']);
         }
     }
 
-    public function updatePart(Request $request) {
+    public function updatePart(Request $request)
+    {
 
         $id = $request->landpart_id;
         $land_id = $request->land_id;
@@ -234,15 +271,14 @@ class LandsController extends Controller
             'color' => $request->color
         ]);
 
-        if($request->hasFile('image')){
+        if ($request->hasFile('image')) {
             $land = LandPart::where([['id', $id], ['land_id', $land_id]])->first();
 
-            if(isset($land->image) && $land->image != null) {
-    
+            if (isset($land->image) && $land->image != null) {
+
                 $fileName = fileUpload('land_parts', $request->image, $land->image);
-    
             } else {
-    
+
                 $fileName = fileUpload('land_parts', $request->image);
             }
 
@@ -250,25 +286,27 @@ class LandsController extends Controller
             $land->save();
         }
 
-        if($updatePart) {
+        if ($updatePart) {
             return redirect()->route('lands.maps', $land_id)->with(['success' => true, 'message' => 'Land part updated successfully!']);
         } else {
             return redirect()->route('lands.maps', $land_id)->with(['error'  => true, 'message' => 'Something went wrong!']);
         }
     }
 
-    public function destroyPart(string $id) {
+    public function destroyPart(string $id)
+    {
 
         $deleteLandPart = LandPart::where('id', $id)->delete();
 
-        if($deleteLandPart) {
+        if ($deleteLandPart) {
             return response()->json(['status' => true, 'message' => 'Success', 'data' => []], 200);
         } else {
             return response()->json(['status' => false, 'message' => 'Error', 'data' => []], 201);
         }
     }
 
-    public function landPartDetails($id) {
+    public function landPartDetails($id)
+    {
 
         $totalWaterUsage = WaterEntry::where('land_part_id', $id)->count();
         $data['totalWaterUsage'] = $totalWaterUsage;
@@ -293,10 +331,19 @@ class LandsController extends Controller
         $landParts = LandPart::where('land_id', $partDetail->land->id)->get();
         $data['landParts'] = $landParts;
 
+        $partDetail = LandPart::findOrFail($id);
+
+        $latestEntry = WaterEntry::where('land_part_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        $data['latestEntry'] = $latestEntry;
+
         return view('land-parts.details', $data);
     }
 
-    public function getWatersTable(Request $request) {
+    public function getWatersTable(Request $request)
+    {
 
         $startDate = $request->startDate;
         $endDate = $request->endDate;
@@ -316,13 +363,15 @@ class LandsController extends Controller
         return View::make('land-parts.Ajax.water-table', $data);
     }
 
-    public function saveWaterEntries(Request $request) {
-
+    public function saveWaterEntries(Request $request)
+    {
+        // dd($request->all());
         $request->validate([
             'land_id' => 'required',
             'land_part_id' => 'required',
             'date' => 'required'
         ]);
+
 
         $createWaterEntry = WaterEntry::create([
             'user_id' => Auth::user()->id,
@@ -335,14 +384,84 @@ class LandsController extends Controller
             'hours' => $request->hours
         ]);
 
-        if($createWaterEntry) {
-            return redirect()->route('land-parts.details', $request->land_part)->with(['success' => true, 'message' => 'Water entry added successfully!']);
+        $latestEntry = WaterEntry::where('land_part_id', $request->land_part_id)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if ($createWaterEntry) {
+            return redirect()->route('land-parts.details', $request->land_part)
+                ->with([
+                    'success' => true,
+                    'message' => 'Water entry added successfully!',
+                    'latestEntry' => $latestEntry
+                ]);
         } else {
-            return redirect()->route('land-parts.details', $request->land_part)->with(['error'  => true, 'message' => 'Something went wrong!']);
+            return redirect()->route('land-parts.details', $request->land_part)
+                ->with(['error' => true, 'message' => 'Something went wrong!']);
         }
     }
 
-    public function getFertilizerTable(Request $request) {
+    public function getJivamrutTable(Request $request)
+    {
+
+        $startDate = $request->startDate;
+        $endDate = $request->endDate;
+        $landPartId = $request->landPartId;
+
+        $query = JivamrutEntry::whereJsonContains('land_part_id', $landPartId)->orderBy('id', 'desc');
+
+        if ($startDate != null && $endDate != null) {
+            $from = date($startDate);
+            $to = date($endDate);
+            $query->whereBetween('date', [$from, $to]);
+        }
+
+        $jivamrutEntries = $query->get();
+        $data['jivamrutEntries'] = $jivamrutEntries;
+
+        return View::make('land-parts.Ajax.jivamrut-table', $data);
+    }
+
+    public function saveJivamrutEntries(Request $request)
+    {
+        // dd($request->all());
+        $request->validate([
+            'land_id' => 'required',
+            'land_part_id' => 'required',
+            'date' => 'required|date',
+            // 'size' => 'nullable|string',
+            // 'barrels' => 'nullable|integer',
+            // 'time' => 'nullable|date_format:H:i',
+            // 'person' => 'nullable|string',
+            // 'volume' => 'nullable|numeric',
+        ]);
+
+        $createJivamrutEntry = JivamrutEntry::create([
+            'user_id' => Auth::id(),
+            'land_id' => $request->land_id,
+            'land_part_id' => $request->land_part_id,
+            'date' => date('Y-m-d', strtotime($request->date)),
+            'time' => date('H:i:s', strtotime($request->time)),
+            'size' => $request->size,
+            'barrels' => $request->barrels,
+            'person' => $request->person,
+            'volume' => $request->volume,
+        ]);
+
+        if ($createJivamrutEntry) {
+            return redirect()->route('land-parts.details', $request->land_part)
+                ->with([
+                    'success' => true,
+                    'message' => 'Jivamrut entry added successfully!'
+                ]);
+        } else {
+            return redirect()->route('land-parts.details', $request->land_part)
+                ->with(['error' => true, 'message' => 'Something went wrong!']);
+        }
+    }
+
+    public function getFertilizerTable(Request $request)
+    {
 
         $startDate = $request->startDate;
         $endDate = $request->endDate;
@@ -362,7 +481,8 @@ class LandsController extends Controller
         return View::make('land-parts.Ajax.fertilizer-table', $data);
     }
 
-    public function saveFertilizerEntries(Request $request) {
+    public function saveFertilizerEntries(Request $request)
+    {
 
         $request->validate([
             'land_id' => 'required',
@@ -382,7 +502,7 @@ class LandsController extends Controller
             'remarks' => $request->remarks,
         ]);
 
-        if($createFertilizerEntry) {
+        if ($createFertilizerEntry) {
             return redirect()->route('land-parts.details', $request->land_part)->with(['success' => true, 'message' => 'Fertilizer Entry added successfully!']);
         } else {
             return redirect()->route('land-parts.details', $request->land_part)->with(['error'  => true, 'message' => 'Something went wrong!']);

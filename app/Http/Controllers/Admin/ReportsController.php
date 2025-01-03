@@ -7,14 +7,18 @@ use App\Models\Bill;
 use App\Models\Diesel;
 use App\Models\DieselEntry;
 use App\Models\Expense;
+use App\Models\FertilizerEntry;
 use App\Models\FertilizerPesticide;
 use App\Models\Infrastructure;
+use App\Models\JivamrutEntry;
+use App\Models\JivamrutFertilizer;
 use App\Models\Land;
 use App\Models\Plant;
 use App\Models\Staff;
 use App\Models\Vehicle;
 use App\Models\VehicleService;
 use App\Models\Water;
+use App\Models\WaterEntry;
 use PDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
@@ -118,7 +122,7 @@ class ReportsController extends Controller
 
         $expenses = $query->get();
         $data['expenses'] = $expenses;
-        
+
         $total = $query->sum('amount');
         $data['total'] = $total;
 
@@ -205,7 +209,7 @@ class ReportsController extends Controller
 
         $water = $query->get();
         $data['water'] = $water;
-        
+
         $total = $query->sum('price');
         $data['total'] = $total;
 
@@ -294,7 +298,7 @@ class ReportsController extends Controller
 
         $diesel = $query->get();
         $data['diesel'] = $diesel;
-        
+
         $total = $query->sum('amount');
         $data['total'] = $total;
 
@@ -379,7 +383,7 @@ class ReportsController extends Controller
 
         $bills = $query->get();
         $data['bills'] = $bills;
-        
+
         $total = $query->sum('amount');
         $data['total'] = $total;
 
@@ -455,7 +459,7 @@ class ReportsController extends Controller
 
         $plants = $query->get();
         $data['plants'] = $plants;
-        
+
         $total = $query->sum('price');
         $data['total'] = $total;
 
@@ -530,7 +534,7 @@ class ReportsController extends Controller
 
         $fertilizerPesticides = $query->get();
         $data['fertilizerPesticides'] = $fertilizerPesticides;
-        
+
         $total = $query->sum('price');
         $data['total'] = $total;
 
@@ -571,7 +575,7 @@ class ReportsController extends Controller
             $query->whereBetween('joining_date', [$from, $to]);
         }
 
-        if(isset($request->type) && $request->type != '') {
+        if (isset($request->type) && $request->type != '') {
             $query->where('type', $request->type);
         }
 
@@ -606,18 +610,17 @@ class ReportsController extends Controller
             $data['to'] = date('d-m-Y', strtotime($endDate));
         }
 
-        if(isset($request->type) && $request->type != '') {
+        if (isset($request->type) && $request->type != '') {
             $query->where('type', $request->type);
 
-            if($request->type == 1) {
+            if ($request->type == 1) {
                 $data['type'] = 'Salaried';
                 $total = $query->sum('salary');
-            } 
-            if($request->type == 2) {
+            }
+            if ($request->type == 2) {
                 $data['type'] = 'On-demand';
                 $total = $query->sum('rate_per_day');
             }
-
         } else {
             $salaryTotal = $query->sum('salary');
             $demandTotal = $query->sum('rate_per_day');
@@ -698,7 +701,7 @@ class ReportsController extends Controller
 
         $vehicleServices = $query->get();
         $data['vehicleServices'] = $vehicleServices;
-        
+
         $total = $query->sum('price');
         $data['total'] = $total;
 
@@ -770,7 +773,7 @@ class ReportsController extends Controller
 
         $diesels = $query->get();
         $data['diesels'] = $diesels;
-        
+
         $total = $query->sum('total_price');
         $data['total'] = $total;
 
@@ -843,7 +846,7 @@ class ReportsController extends Controller
 
         $infrastructures = $query->get();
         $data['infrastructures'] = $infrastructures;
-        
+
         $total = $query->sum('amount');
         $data['total'] = $total;
 
@@ -852,5 +855,156 @@ class ReportsController extends Controller
         // return View::make('reports.Pdf.plant', $data);
         // return $pdf->stream();
         return $pdf->download('infrastructure_report.pdf');
+    }
+
+    // plot Report
+    public function plotIndex(Request $request)
+    {
+        $totalLandCount = Land::count();
+        $data['totalLandCount'] = $totalLandCount;
+
+        $totalWaterVolume = WaterEntry::sum('volume');
+        $data['totalWaterVolume'] = $totalWaterVolume;
+
+        $totalJivamrutliter = JivamrutEntry::sum('size');
+        $data['totalJivamrutliter'] = $totalJivamrutliter;
+
+        $totalFertilizerQty = FertilizerEntry::sum('qty');
+        $data['totalFertilizerQty'] = $totalFertilizerQty;
+
+        $lands = Land::pluck('name', 'id')->toArray();
+        $data['lands'] = $lands;
+
+        return view('reports.plot', $data);
+    }
+
+    public function getPlotTable(Request $request)
+    {
+        $category = $request->category;
+        $startDate = $request->startDate;
+        $endDate = $request->endDate;
+        $landId = $request->land_id;
+
+        // Initialize query variables as collections
+        $entries = collect();
+        $lands = collect();
+
+        // Fetch lands (this will be used for all categories)
+        $lands = Land::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        })
+            ->when($landId, function ($query) use ($landId) {
+                $query->where('id', $landId);
+            })
+            ->get(); // Ensures lands is a collection
+
+        // Apply filters for entries based on the category
+        if ($category == 'water') {
+            $entries = WaterEntry::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('date', [$startDate, $endDate]);
+            })
+                ->when($landId, function ($query) use ($landId) {
+                    $query->where('land_id', $landId);
+                })
+                ->get(); // Ensures entries is a collection
+        } elseif ($category == 'fertilizer') {
+            $entries = FertilizerEntry::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('date', [$startDate, $endDate]);
+            })
+                ->when($landId, function ($query) use ($landId) {
+                    $query->where('land_id', $landId);
+                })
+                ->get(); // Ensures entries is a collection
+        } elseif ($category == 'jivamrut') {
+            $entries = JivamrutEntry::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('date', [$startDate, $endDate]);
+            })
+                ->when($landId, function ($query) use ($landId) {
+                    $query->where('land_id', $landId);
+                })
+                ->get(); // Ensures entries is a collection
+        }
+
+        // Prepare data for the view
+        $data = [
+            'category' => $category,
+            'entries' => $entries,
+            'lands' => $lands,
+        ];
+
+        return View::make('reports.Ajax.plot', $data);
+    }
+
+    public function generatePlotPdf(Request $request)
+    {
+        // Extract filters
+        $category = $request->category;
+        $landId = $request->land_id;
+        $reportrange = $request->reportrange;
+
+        // Initialize date range
+        $startDate = null;
+        $endDate = null;
+        if ($reportrange) {
+            [$startDate, $endDate] = explode(' - ', $reportrange);
+            $startDate = date('Y-m-d', strtotime($startDate));
+            $endDate = date('Y-m-d', strtotime($endDate));
+        }
+
+        // Initialize query and fetch data based on category
+        $entries = collect();
+        if ($category === 'water') {
+            $entries = WaterEntry::with('land')
+                ->when($startDate && $endDate, fn($query) => $query->whereBetween('date', [$startDate, $endDate]))
+                ->when($landId, fn($query) => $query->where('land_id', $landId))
+                ->get();
+        } elseif ($category === 'fertilizer') {
+            $entries = FertilizerEntry::with('land')
+                ->when($startDate && $endDate, fn($query) => $query->whereBetween('date', [$startDate, $endDate]))
+                ->when($landId, fn($query) => $query->where('land_id', $landId))
+                ->get();
+        } elseif ($category === 'jivamrut') {
+            $entries = JivamrutEntry::with('land')
+                ->when($startDate && $endDate, fn($query) => $query->whereBetween('date', [$startDate, $endDate]))
+                ->when($landId, fn($query) => $query->where('land_id', $landId))
+                ->get();
+        }
+
+        // Fetch land details if landId is provided
+        $landDetail = $landId ? Land::find($landId) : null;
+
+        // Total calculation based on category
+        $total = 0;
+        if ($category === 'water') {
+            $total = $entries->sum('volume'); // Adjust as per requirement
+        } elseif ($category === 'fertilizer') {
+            $total = $entries->sum('quantity'); // Adjust as per requirement
+        }else{
+            $total = $entries->sum('size');
+        }
+
+        // Prepare data for the view
+        $data = [
+            'category' => $category,
+            'entries' => $entries,
+            'landDetail' => $landDetail,
+            'from' => $startDate ? date('d-m-Y', strtotime($startDate)) : null,
+            'to' => $endDate ? date('d-m-Y', strtotime($endDate)) : null,
+            'total' => $total,
+        ];
+
+        // Generate a dynamic filename
+        $filename = 'Plot_Report_' . ucfirst($category);
+        if ($landDetail) {
+            $filename .= '_Land_' . str_replace(' ', '_', $landDetail->name);
+        }
+        if ($startDate && $endDate) {
+            $filename .= '_' . $startDate . '_to_' . $endDate;
+        }
+        $filename .= '.pdf';
+
+        // Generate PDF and return download
+        $pdf = PDF::loadView('reports.Pdf.plot', $data);
+        return $pdf->download($filename);
     }
 }
