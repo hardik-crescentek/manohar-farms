@@ -99,10 +99,8 @@ class BillsController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'land_id' => 'required',
+                'type' => 'required',
                 'amount' => 'required',
-                'period_start' => 'required',
-                'period_end' => 'required',
             ]);
 
             if ($validator->fails()) {

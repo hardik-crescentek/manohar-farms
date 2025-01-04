@@ -9,8 +9,10 @@ use App\Http\Controllers\Api\DieselManagementController;
 use App\Http\Controllers\Api\ExpensesController;
 use App\Http\Controllers\Api\FertilizerEntryController;
 use App\Http\Controllers\Api\FertilizerPesticidesController;
+use App\Http\Controllers\Api\JivamrutEntryController;
 use App\Http\Controllers\Api\LandsController;
 use App\Http\Controllers\Api\MapsController;
+use App\Http\Controllers\Api\MiscellaneousController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PlantsController;
 use App\Http\Controllers\Api\ReportsController;
@@ -34,7 +36,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
 });
 
-Route::group(['middleware' => ['auth:sanctum']], function() {
+Route::group(['middleware' => ['auth:sanctum']], function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
 
@@ -52,6 +54,7 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::resource('lands', LandsController::class);
     Route::resource('bills', BillsController::class);
     Route::resource('expenses', ExpensesController::class);
+    Route::resource('miscellaneous', MiscellaneousController::class);
 
     Route::post('vehicles/delete-document', [VehiclesController::class, 'deleteDocument']);
 
@@ -64,6 +67,11 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::get('fertilizer-entries/plot-wise/{id}', [FertilizerEntryController::class, 'getFertilizerPlotWise']);
     Route::put('fertilizer-entries/update/{id}', [FertilizerEntryController::class, 'updateFertilizerPlotWise']);
     Route::delete('fertilizer-entries/delete/{id}', [FertilizerEntryController::class, 'destroyFertilizerPlotWise']);
+
+    Route::post('jivamrut-entries/save', [JivamrutEntryController::class, 'saveJivamrutEntry']);
+    Route::get('jivamrut-entries/plot-wise/{id}', [JivamrutEntryController::class, 'getJivamrutPlotWise']);
+    Route::put('jivamrut-entries/update/{id}', [JivamrutEntryController::class, 'updateJivamrutEntry']);
+    Route::delete('jivamrut-entries/delete/{id}', [JivamrutEntryController::class, 'destroyJivamrutEntry']);
 
     Route::get('reports/get-report', [ReportsController::class, 'getReport']);
     Route::get('reports/get-home-report', [ReportsController::class, 'getHomeReport']);
