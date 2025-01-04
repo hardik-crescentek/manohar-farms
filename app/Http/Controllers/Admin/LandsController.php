@@ -12,6 +12,7 @@ use App\Models\Plant;
 use App\Models\PlotFertilizer;
 use App\Models\Water;
 use App\Models\WaterEntry;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
@@ -192,24 +193,32 @@ class LandsController extends Controller
         $PlotFertilizer = PlotFertilizer::where('land_id', $id)->get();
         $data['PlotFertilizer'] = $PlotFertilizer;
 
-        // Fetch the latest water entry
-        $latestEntry = WaterEntry::where('land_id', $id)
-            ->orderBy('created_at', 'desc')
+        // Fetch the latest entry from each table
+        $latestWaterEntry = WaterEntry::where('land_id', $id)->orderBy('created_at', 'desc')->first();
+        $latestJivamrutEntry = JivamrutEntry::where('land_id', $id)->orderBy('created_at', 'desc')->first();
+        $latestFertilizerEntry = FertilizerEntry::where('land_id', $id)->orderBy('created_at', 'desc')->first();
+
+        // Find the latest of all three entries
+        $latestEntry = collect([$latestWaterEntry, $latestJivamrutEntry, $latestFertilizerEntry])
+            ->filter() // Remove null values
+            ->sortByDesc(fn($entry) => $entry->created_at) // Sort by created_at descending
             ->first();
 
         if ($latestEntry) {
-            // Include additional related details (land part and valve)
             $latestLandPart = LandPart::find($latestEntry->land_part_id);
+            $latestEntry->time = Carbon::parse($latestEntry->time);
+
             $data['latestEntry'] = [
                 'entry' => $latestEntry,
-                'landPartName' => $latestLandPart ? $latestLandPart[0]->name : 'Unknown',
+                'landPartName' => $latestLandPart[0]->name ?? 'Unknown',
                 'formattedTime' => $latestEntry->formatted_time, // Using the accessor
             ];
+            // dd($data['latestEntry']);
         } else {
             $data['latestEntry'] = null;
         }
 
-        // dd($data);
+        // Pass data to the view
         return view('lands.maps', $data);
     }
 
@@ -334,6 +343,18 @@ class LandsController extends Controller
         $partDetail = LandPart::findOrFail($id);
 
         $latestEntry = WaterEntry::where('land_part_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        $data['latestEntry'] = $latestEntry;
+
+        $latestEntry = JivamrutEntry::where('land_part_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        $data['latestEntry'] = $latestEntry;
+
+        $latestEntry = FertilizerEntry::where('land_part_id', $id)
             ->orderBy('created_at', 'desc')
             ->first();
 

@@ -42,6 +42,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     Route::get('/maps/{id}/get-valves', [MapsController::class, 'getValves']);
     Route::get('/get-maps', [MapsController::class, 'getMaps']);
+    Route::get('/maps/{id}/latest-valve', [MapsController::class, 'getLatestOpenValve']);
 
     Route::resource('admins', AdminController::class);
     Route::resource('plants', PlantsController::class);

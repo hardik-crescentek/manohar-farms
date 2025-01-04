@@ -120,7 +120,7 @@
                                 <span class="font-weight-bold">{{ $latestEntry['landPartName'] ?? 'N/A' }}</span>
                             </h2>
                             <p class="mb-2 text-muted">
-                                {{ $latestEntry['entry']->time ?? 'N/A' }}
+                                {{ $latestEntry['entry']->time->format('h:i A') ?? 'N/A' }}
                                 <span
                                     class="float-right">{{ optional($latestEntry['entry']->date)->format('d-m-Y') ?? 'N/A' }}</span>
                             </p>
