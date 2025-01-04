@@ -56,10 +56,12 @@
                                 <div class="form-group">
                                     <label>Image</label>
                                     <input class="form-control" name="image" type="file" accept="image/*">
-                                    <small class="text-muted">Current Image:
+                                    <small class="text-muted">Current Image:</small>
+                                    <div style="margin-top: 10px;">
                                         <img src="{{ asset('uploads/miscellaneouses/images/' . $miscellaneous->image) }}"
-                                            alt="Image" width="100%" height="500px">
-                                    </small>
+                                            alt="Image Preview"
+                                            style="max-width: 150px; max-height: 150px; object-fit: contain; display: block;">
+                                    </div>
                                     @error('image')
                                         <ul class="parsley-errors-list filled">
                                             <li class="parsley-required">{{ $message }}</li>
@@ -67,14 +69,19 @@
                                     @enderror
                                 </div>
                             </div>
+
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>PDF</label>
                                     <input class="form-control" name="pdf" type="file" accept="application/pdf">
-                                    <small class="text-muted">Current PDF: </small>
+                                    <small class="text-muted">Current PDF:</small>
                                     @if ($miscellaneous->pdf)
-                                        <iframe src="{{ asset('uploads/miscellaneouses/pdfs/' . $miscellaneous->pdf) }}"
-                                            width="100%" height="500px" style="border: none;"></iframe>
+                                        <div style="margin-top: 10px;">
+                                            <a href="{{ asset('uploads/miscellaneouses/pdfs/' . $miscellaneous->pdf) }}"
+                                                target="_blank" class="btn btn-sm btn-primary">
+                                                View PDF
+                                            </a>
+                                        </div>
                                     @else
                                         <p>No PDF available</p>
                                     @endif
@@ -85,6 +92,7 @@
                                     @enderror
                                 </div>
                             </div>
+
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Date</label>
