@@ -34,8 +34,8 @@ class PlantsController extends Controller
     {
         $request->validate([
             'name' => 'required|max:120',
-            'quantity' => 'required',
-            'price' => 'required'
+            'quantity' => 'required|integer',
+            'price' => 'required|numeric'
         ]);
 
         $fileName = '';
@@ -54,7 +54,7 @@ class PlantsController extends Controller
             'date' => isset($request->date) && $request->date != NULL ? date('Y-m-d', strtotime($request->date)) : NULL
         ]);
 
-        if($createPlant) {
+        if ($createPlant) {
             return redirect()->route('plants.index')->with(['success' => true, 'message' => 'Plant added successfully!']);
         } else {
             return redirect()->route('plants.index')->with(['error'  => true, 'message' => 'Something went wrong!']);
@@ -87,8 +87,8 @@ class PlantsController extends Controller
     {
         $request->validate([
             'name' => 'required|max:120',
-            'quantity' => 'required',
-            'price' => 'required'
+            'quantity' => 'required|integer',
+            'price' => 'required|numeric'
         ]);
 
         $updatePlant = Plant::where('id', $id)->update([
@@ -101,15 +101,14 @@ class PlantsController extends Controller
             'date' => isset($request->date) && $request->date != NULL ? date('Y-m-d', strtotime($request->date)) : NULL
         ]);
 
-        if($request->hasFile('image')){
+        if ($request->hasFile('image')) {
             $plant = Plant::where('id', $id)->first();
 
-            if(isset($plant->image) && $plant->image != null) {
-    
+            if (isset($plant->image) && $plant->image != null) {
+
                 $fileName = fileUpload('plants', $request->image, $plant->image);
-    
             } else {
-    
+
                 $fileName = fileUpload('plants', $request->image);
             }
 
@@ -117,7 +116,7 @@ class PlantsController extends Controller
             $plant->save();
         }
 
-        if($updatePlant) {
+        if ($updatePlant) {
             return redirect()->route('plants.index')->with(['success' => true, 'message' => 'Plant updated successfully!']);
         } else {
             return redirect()->route('plants.index')->with(['error'  => true, 'message' => 'Something went wrong!']);
@@ -131,7 +130,7 @@ class PlantsController extends Controller
     {
         $deletePlant = Plant::where('id', $id)->delete();
 
-        if($deletePlant) {
+        if ($deletePlant) {
             return response()->json(['status' => true, 'message' => 'Success', 'data' => []], 200);
         } else {
             return response()->json(['status' => false, 'message' => 'Error', 'data' => []], 201);
