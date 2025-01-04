@@ -55,18 +55,19 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::resource('lands', LandsController::class);
     Route::resource('bills', BillsController::class);
     Route::resource('expenses', ExpensesController::class);
-    // Miscellaneous
     Route::resource('miscellaneous', MiscellaneousController::class);
 
     Route::post('vehicles/delete-document', [VehiclesController::class, 'deleteDocument']);
 
     Route::post('land-parts/save-water', [LandsController::class, 'saveWater']);
     Route::get('land-parts/get-water/{id}', [LandsController::class, 'getWaterLandPartWise']);
+    Route::put('land-parts/update-water/{id}', [LandsController::class, 'updateWaterLandPartWise']);
     Route::delete('land-parts/delete-water/{id}', [LandsController::class, 'destroyWaterLandPartWise']);
-
 
     Route::post('fertilizer-entries/save', [FertilizerEntryController::class, 'saveFertilizerEntry']);
     Route::get('fertilizer-entries/plot-wise/{id}', [FertilizerEntryController::class, 'getFertilizerPlotWise']);
+    Route::put('fertilizer-entries/update/{id}', [FertilizerEntryController::class, 'updateFertilizerPlotWise']);
+    Route::delete('fertilizer-entries/delete/{id}', [FertilizerEntryController::class, 'destroyFertilizerPlotWise']);
 
     Route::post('jivamrut-entries/save', [JivamrutEntryController::class, 'saveJivamrutEntry']);
     Route::get('jivamrut-entries/plot-wise/{id}', [JivamrutEntryController::class, 'getJivamrutPlotWise']);

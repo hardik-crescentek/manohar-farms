@@ -186,4 +186,59 @@ class LandsController extends Controller
             return response()->json(['status' => 400, 'message' => $e->getMessage()], 400);
         }
     }
+
+    public function updateWaterLandPartWise(Request $request, $id)
+    {
+        try {
+            // Validate the input data
+            $validator = Validator::make($request->all(), [
+                'land_id' => 'required',
+                'land_part_id' => 'required',
+                'date' => 'required',
+                'time' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                throw new \Exception($validator->errors()->first());
+            }
+
+            // Find the water entry
+            $waterEntry = WaterEntry::find($id);
+
+            if (!$waterEntry) {
+                throw new \Exception('Water entry not found.');
+            }
+
+            // Update the water entry
+            $waterEntry->update([
+                'land_id' => $request->land_id,
+                'land_part_id' => $request->land_part_id,
+                'date' => date('Y-m-d', strtotime($request->date)),
+                'time' => date('H:i:s', strtotime($request->time)),
+                'person' => $request->person,
+                'volume' => $request->volume,
+                'notes' => $request->notes,
+            ]);
+
+            return response()->json(['status' => 200, 'message' => 'Water Entry updated successfully!', 'data' => $waterEntry], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['status' => 400, 'message' => $e->getMessage()], 400);
+        }
+    }
+
+    public function destroyWaterLandPartWise(string $id)
+    {
+        try {
+            $deleteWaterEntry = WaterEntry::where('id', $id)->delete();
+
+            if ($deleteWaterEntry) {
+                return response()->json(['status' => 200, 'message' => 'Water entry deleted successfully!', 'data' => []], 200);
+            } else {
+                throw new \Exception('Error deleting water entry');
+            }
+        } catch (\Exception $e) {
+            return response()->json(['status' => 400, 'message' => $e->getMessage(), 'data' => []], 400);
+        }
+    }
 }
