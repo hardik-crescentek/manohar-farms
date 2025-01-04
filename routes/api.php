@@ -57,9 +57,13 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     Route::post('land-parts/save-water', [LandsController::class, 'saveWater']);
     Route::get('land-parts/get-water/{id}', [LandsController::class, 'getWaterLandPartWise']);
+    Route::put('land-parts/update-water/{id}', [LandsController::class, 'updateWaterLandPartWise']);
+    Route::delete('land-parts/delete-water/{id}', [LandsController::class, 'destroyWaterLandPartWise']);
 
     Route::post('fertilizer-entries/save', [FertilizerEntryController::class, 'saveFertilizerEntry']);
     Route::get('fertilizer-entries/plot-wise/{id}', [FertilizerEntryController::class, 'getFertilizerPlotWise']);
+    Route::put('fertilizer-entries/update/{id}', [FertilizerEntryController::class, 'updateFertilizerPlotWise']);
+    Route::delete('fertilizer-entries/delete/{id}', [FertilizerEntryController::class, 'destroyFertilizerPlotWise']);
 
     Route::get('reports/get-report', [ReportsController::class, 'getReport']);
     Route::get('reports/get-home-report', [ReportsController::class, 'getHomeReport']);
