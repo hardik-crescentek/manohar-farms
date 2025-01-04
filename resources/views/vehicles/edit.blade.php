@@ -95,8 +95,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="">Service Vehicle Notification </label>
-                                <input class="form-control" name="vehicle_notification" required="" type="text" value="{{ old('vehicle_notification', $vehicle->vehicle_notification) }}">
-                                @error('vehicle_notification') <ul class="parsley-errors-list filled"> <li class="parsley-required">{{ $message }}</li> </ul> @enderror
+                                <input class="form-control" name="vehicle_notification" type="text" value="{{ old('vehicle_notification', $vehicle->vehicle_notification) }}">
                             </div>
                         </div>
                     </div>

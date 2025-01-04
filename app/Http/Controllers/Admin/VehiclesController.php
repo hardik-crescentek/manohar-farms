@@ -35,9 +35,10 @@ class VehiclesController extends Controller
     {
         $request->validate([
             'type' => 'required',
-            'name' => 'required',
-            'number' => 'required'
+            'name' => 'required|string',
+            'number' => 'required|numeric',
         ]);
+
 
         $documentsFiles = $request->documents;
         $documentNames = [];
@@ -95,9 +96,10 @@ class VehiclesController extends Controller
     {
         $request->validate([
             'type' => 'required',
-            'name' => 'required',
-            'number' => 'required'
+            'name' => 'required|string',
+            'number' => 'required|numeric',
         ]);
+
 
         $existingVehicle = Vehicle::where('id', $id)->first();
         $existingDoc = isset($existingVehicle->documents) && $existingVehicle->documents != null ? json_decode($existingVehicle->documents) : [];
@@ -151,14 +153,14 @@ class VehiclesController extends Controller
         if($vehicle) {
 
             $documents = isset($vehicle->documents) && $vehicle->documents ? json_decode($vehicle->documents) : [];
-            
+
             if(sizeof($documents) > 0) {
 
                 if(file_exists(public_path('uploads/vehicles_and_attachments/'.$docname))) {
                     unlink(public_path('uploads/vehicles_and_attachments/'.$docname));
                 }
                 $position = array_search($docname, $documents);
-                
+
                 unset($documents[$position]);
 
                 $updateVehicle = Vehicle::where('id', $id)->update([
