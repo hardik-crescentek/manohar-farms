@@ -15,20 +15,12 @@ jobs:
         uses: actions/checkout@v3
 
       # Install sshpass to handle password-based SSH
-      - name: Install sshpass
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y sshpass
-
-      - name: Add SSH key to known_hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H 45.76.134.183 >> ~/.ssh/known_hosts
-
-      # Deploy code using sshpass and rsync
-      - name: Deploy with rsync
-        # env:
-        #   SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
-        #   SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-        run: |
-          sshpass -p "1c!Y3S5E!4$w" rsync -avz --delete ./ faruk@45.76.134.183:/home/1098524.cloudwaysapps.com/ytcatbavac/public_html/ankit-test/
+      - name: copy file via ssh password
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 45.76.134.183
+          username: faruk
+          password: 1c!Y3S5E!4$w
+          port: 22
+          source: "./"
+          target: /home/1098524.cloudwaysapps.com/ytcatbavac/public_html/ankit-test/
