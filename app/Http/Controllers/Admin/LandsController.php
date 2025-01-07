@@ -155,6 +155,73 @@ class LandsController extends Controller
         }
     }
 
+    // public function landMaps(Request $request, $id)
+    // {
+    //     // Total water used (in hours)
+    //     $totalWaterUsed = WaterEntry::where('land_id', $id)->sum('hours');
+    //     $data['totalWaterUsed'] = $totalWaterUsed;
+
+    //     // Current month's water usage
+    //     $currentMonthWaterUsed = WaterEntry::where('land_id', $id)
+    //         ->whereMonth('date', date('m'))
+    //         ->sum('hours');
+    //     $data['currentMonthWaterUsed'] = $currentMonthWaterUsed;
+
+    //     // Total water expense
+    //     $totalWaterExpense = Water::where('land_id', $id)->sum('price');
+    //     $data['totalWaterExpense'] = $totalWaterExpense;
+
+    //     // Current month's water expense
+    //     $currentMonthWaterExpense = Water::where('land_id', $id)
+    //         ->whereMonth('date', date('m'))
+    //         ->sum('price');
+    //     $data['currentMonthWaterExpense'] = $currentMonthWaterExpense;
+
+    //     // Land details
+    //     $land = Land::where('id', $id)->first();
+    //     $data['land'] = $land;
+
+    //     // Land parts
+    //     $landParts = LandPart::where('land_id', $id)->get();
+    //     $data['landParts'] = $landParts;
+
+    //     // Flush history
+    //     $flushHistory = FlushHistory::where('land_id', $id)->get();
+    //     $data['flushHistory'] = $flushHistory;
+
+    //     // Plot Fertilizer history
+    //     $PlotFertilizer = PlotFertilizer::where('land_id', $id)->get();
+    //     $data['PlotFertilizer'] = $PlotFertilizer;
+
+    //     // Fetch the latest entry from each table
+    //     $latestWaterEntry = WaterEntry::where('land_id', $id)->orderBy('created_at', 'desc')->first();
+    //     $latestJivamrutEntry = JivamrutEntry::where('land_id', $id)->orderBy('created_at', 'desc')->first();
+    //     $latestFertilizerEntry = FertilizerEntry::where('land_id', $id)->orderBy('created_at', 'desc')->first();
+
+    //     // Find the latest of all three entries
+    //     $latestEntry = collect([$latestWaterEntry, $latestJivamrutEntry, $latestFertilizerEntry])
+    //         ->filter() // Remove null values
+    //         ->sortByDesc(fn($entry) => $entry->created_at) // Sort by created_at descending
+    //         ->first();
+
+    //     if ($latestEntry) {
+    //         $latestLandPart = LandPart::find($latestEntry->land_part_id);
+    //         $latestEntry->time = Carbon::parse($latestEntry->time);
+
+    //         $data['latestEntry'] = [
+    //             'entry' => $latestEntry,
+    //             'landPartName' => $latestLandPart[0]->name ?? 'Unknown',
+    //             'formattedTime' => $latestEntry->formatted_time, // Using the accessor
+    //         ];
+    //         // dd($data['latestEntry']);
+    //     } else {
+    //         $data['latestEntry'] = null;
+    //     }
+
+    //     // Pass data to the view
+    //     return view('lands.maps', $data);
+    // }
+
     public function landMaps(Request $request, $id)
     {
         // Total water used (in hours)
@@ -198,31 +265,46 @@ class LandsController extends Controller
         $latestJivamrutEntry = JivamrutEntry::where('land_id', $id)->orderBy('created_at', 'desc')->first();
         $latestFertilizerEntry = FertilizerEntry::where('land_id', $id)->orderBy('created_at', 'desc')->first();
 
-        // Find the latest of all three entries
-        $latestEntry = collect([$latestWaterEntry, $latestJivamrutEntry, $latestFertilizerEntry])
-            ->filter() // Remove null values
-            ->sortByDesc(fn($entry) => $entry->created_at) // Sort by created_at descending
-            ->first();
+        // Prepare all latest entries for display
+        $data['latestEntries'] = collect([
+            [
+                'type' => 'WaterEntry',
+                'entry' => $latestWaterEntry,
+                'landParts' => $latestWaterEntry ? $this->getLandPartNames($latestWaterEntry->land_part_id) : 'N/A',
+                'time' => $latestWaterEntry && $latestWaterEntry->time ? Carbon::parse($latestWaterEntry->time)->format('H:i:s') : 'N/A',
+                'date' => $latestWaterEntry && $latestWaterEntry->date ? Carbon::parse($latestWaterEntry->date)->format('Y-m-d') : 'N/A',
+            ],
+            [
+                'type' => 'JivamrutEntry',
+                'entry' => $latestJivamrutEntry,
+                'landParts' => $latestJivamrutEntry ? $this->getLandPartNames($latestJivamrutEntry->land_part_id) : 'N/A',
+                'time' => $latestJivamrutEntry && $latestJivamrutEntry->time ? Carbon::parse($latestJivamrutEntry->time)->format('H:i:s') : 'N/A',
+                'date' => $latestJivamrutEntry && $latestJivamrutEntry->date ? Carbon::parse($latestJivamrutEntry->date)->format('Y-m-d') : 'N/A',
+            ],
+            [
+                'type' => 'FertilizerEntry',
+                'entry' => $latestFertilizerEntry,
+                'landParts' => $latestFertilizerEntry ? $this->getLandPartNames($latestFertilizerEntry->land_part_id) : 'N/A',
+                'time' => $latestFertilizerEntry && $latestFertilizerEntry->time ? Carbon::parse($latestFertilizerEntry->time)->format('H:i:s') : 'N/A',
+                'date' => $latestFertilizerEntry && $latestFertilizerEntry->date ? Carbon::parse($latestFertilizerEntry->date)->format('Y-m-d') : 'N/A',
+            ],
+        ])->toArray();
 
-        if ($latestEntry) {
-            $latestLandPart = LandPart::find($latestEntry->land_part_id);
-            $latestEntry->time = Carbon::parse($latestEntry->time);
-
-            $data['latestEntry'] = [
-                'entry' => $latestEntry,
-                'landPartName' => $latestLandPart[0]->name ?? 'Unknown',
-                'formattedTime' => $latestEntry->formatted_time, // Using the accessor
-            ];
-            // dd($data['latestEntry']);
-        } else {
-            $data['latestEntry'] = null;
-        }
-
-        // Pass data to the view
         return view('lands.maps', $data);
     }
 
 
+    private function getLandPartNames($landPartIds)
+    {
+        // If land_part_id is a string (JSON), decode it into an array
+        $landPartIdsArray = is_string($landPartIds) ? json_decode($landPartIds, true) : $landPartIds;
+
+        // Fetch land part names for the given land part ids
+        $landParts = LandPart::whereIn('id', $landPartIdsArray)->pluck('name')->toArray();
+
+        // Return the land part names as a comma-separated string
+        return implode(', ', $landParts);
+    }
 
     public function saveDocuments(Request $request)
     {

@@ -81,7 +81,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
+        <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3">
             <div class="card custom-card">
                 <div class="card-body">
                     <a class="card-order" href="javascript:;">
@@ -93,7 +93,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
+        <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3">
             <div class="card custom-card">
                 <div class="card-body">
                     <a class="card-order" href="javascript:;">
@@ -106,7 +106,7 @@
             </div>
         </div>
 
-        @if ($latestEntry)
+        {{-- @if ($latestEntry)
             <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
                 <div class="card custom-card">
                     <div class="card-body">
@@ -132,8 +132,112 @@
             <div class="col-12">
                 <p class="text-muted text-center">No water entry records found.</p>
             </div>
-        @endif
+        @endif --}}
 
+        {{-- Test Code --}}
+
+        {{-- @if ($latestEntries && count($latestEntries) > 0)
+            <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <a class="card-order" href="javascript:;">
+                            <!-- Label for the last open valve -->
+                            <label class="main-content-label mb-3 pt-1">
+                                Last Open Valve in ({{ isset($land->name) ? $land->name : 'N/A' }})
+                            </label>
+                        </a>
+
+                        <!-- Row for the three sections -->
+                        <div class="row flex-wrap">
+                            @foreach ($latestEntries as $entry)
+                                <!-- Check if the type has valid data -->
+                                @if (!empty($entry['entry']))
+                                    <div class="col-sm-12 col-md-4 col-lg-4 mb-3">
+                                        <div class="d-flex flex-column ">
+                                            <!-- Type and Valve -->
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="text-muted">
+                                                    {{ isset($entry['type']) ? $entry['type'] : 'N/A' }}
+                                                </span>
+                                                <span class="text-muted">
+                                                    {{ isset($entry['landParts']) ? $entry['landParts'] : 'N/A' }}
+                                                </span>
+                                            </div>
+
+                                            <!-- Date and Time -->
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="text-muted">
+                                                    {{ isset($entry['date']) && $entry['date'] != 'N/A' ? \Carbon\Carbon::parse($entry['date'])->format('d-m-Y') : 'N/A' }}
+                                                </span>
+                                                <span class="text-muted">
+                                                    {{ isset($entry['time']) && $entry['time'] != 'N/A' ? \Carbon\Carbon::parse($entry['time'])->format('h:i A') : 'N/A' }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @else
+            <div class="col-12">
+                <p class="text-muted text-center">No water entry records found.</p>
+            </div>
+        @endif --}}
+
+        @if ($latestEntries && count($latestEntries) > 0)
+            <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="row justify-content-center">
+                            @foreach ($latestEntries as $entry)
+                                @if (!empty($entry['entry']))
+                                    @php
+                                        // Determine the column size dynamically
+                                        $colSize = match (count($latestEntries)) {
+                                            1 => 'col-12', // Full-width for 1 entry
+                                            2 => 'col-6', // Half-width for 2 entries
+                                            default => 'col-md-4', // 4-columns for 3 or more entries
+                                        };
+                                    @endphp
+                                    <div class="{{ $colSize }} mb-2">
+                                        <div class="d-flex flex-column p-2 ">
+                                            <!-- Type Name at the top -->
+                                            <label class="main-content-label text-center">
+                                                Last Open Valve in ({{ isset($entry['type']) ? $entry['type'] : 'N/A' }})
+                                            </label>
+
+                                            <!-- Valve (Land Parts) -->
+                                            <div class="text-center">
+                                                <span class="text-muted">
+                                                    {{ isset($entry['landParts']) ? $entry['landParts'] : 'N/A' }}
+                                                </span>
+                                            </div>
+
+                                            <!-- Date and Time -->
+                                            <div class="d-flex justify-content-between mt-2">
+                                                <span class="text-muted">
+                                                    {{ isset($entry['date']) && $entry['date'] != 'N/A' ? \Carbon\Carbon::parse($entry['date'])->format('d-m-Y') : 'N/A' }}
+                                                </span>
+                                                <span class="text-muted">
+                                                    {{ isset($entry['time']) && $entry['time'] != 'N/A' ? \Carbon\Carbon::parse($entry['time'])->format('h:i A') : 'N/A' }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @else
+            <div class="col-12">
+                <p class="text-muted text-center">No water entry records found.</p>
+            </div>
+        @endif
     </div>
     <!-- End Row -->
 
@@ -326,17 +430,19 @@
                                         <td>{{ $entry->time }}</td>
                                         <td>
                                             <a href="javascript:;" title="Edit"
-                                                data-target="#editFertilizerEntry{{ $entry->id }}" data-toggle="modal">
+                                                data-target="#editFertilizerEntry{{ $entry->id }}"
+                                                data-toggle="modal">
                                                 <i class="fa fa-pen text-primary mr-2"></i>
                                             </a>
 
-                                            <div class="modal editFertilizerEntry" id="editFertilizerEntry{{ $entry->id }}">
+                                            <div class="modal editFertilizerEntry"
+                                                id="editFertilizerEntry{{ $entry->id }}">
                                                 <div class="modal-dialog" role="document">
                                                     <div class="modal-content modal-content-demo">
                                                         <div class="modal-header">
                                                             <h6 class="modal-title">Edit Fertilizer Entry</h6>
-                                                            <button aria-label="Close" class="close" data-dismiss="modal"
-                                                                type="button"><span
+                                                            <button aria-label="Close" class="close"
+                                                                data-dismiss="modal" type="button"><span
                                                                     aria-hidden="true">&times;</span></button>
                                                         </div>
                                                         <form class="parsley-validate" method="post"
@@ -363,7 +469,8 @@
                                                                     </div>
                                                                     <div class="col-md-12">
                                                                         <div class="form-group">
-                                                                            <label for="fertilizer_name">Fertilizer Name</label>
+                                                                            <label for="fertilizer_name">Fertilizer
+                                                                                Name</label>
                                                                             <input type="text" class="form-control"
                                                                                 name="fertilizer_name"
                                                                                 value="{{ $entry->fertilizer_name }}"
@@ -384,12 +491,13 @@
                                                                             <div class="input-group">
                                                                                 <div class="input-group-prepend">
                                                                                     <div class="input-group-text">
-                                                                                        <i class="fe fe-calendar lh--9 op-6"></i>
+                                                                                        <i
+                                                                                            class="fe fe-calendar lh--9 op-6"></i>
                                                                                     </div>
                                                                                 </div>
                                                                                 <input class="form-control datepicker"
-                                                                                    placeholder="DD/MM/YYYY" type="text"
-                                                                                    name="date"
+                                                                                    placeholder="DD/MM/YYYY"
+                                                                                    type="text" name="date"
                                                                                     value="{{ isset($entry->date) ? $entry->date->format('d-m-Y') : '' }}"
                                                                                     required>
                                                                             </div>
@@ -408,8 +516,8 @@
                                                             <div class="modal-footer">
                                                                 <button class="btn ripple btn-primary" type="submit">Save
                                                                     changes</button>
-                                                                <button class="btn ripple btn-secondary" data-dismiss="modal"
-                                                                    type="button">Close</button>
+                                                                <button class="btn ripple btn-secondary"
+                                                                    data-dismiss="modal" type="button">Close</button>
                                                             </div>
                                                         </form>
                                                     </div>
