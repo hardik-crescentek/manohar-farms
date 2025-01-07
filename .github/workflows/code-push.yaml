@@ -23,4 +23,6 @@ jobs:
           mkdir -p ~/.ssh
           echo "StrictHostKeyChecking no" >> ~/.ssh/config
           echo "UserKnownHostsFile=/dev/null" >> ~/.ssh/config
+          echo "PreferredAuthentications password" >> ~/.ssh/config
+          echo "PasswordAuthentication yes" | sudo tee -a /etc/ssh/sshd_config
           sshpass -p "1c!Y3S5E!4$w" scp -rv faruk@45.76.134.183:./ /home/1098524.cloudwaysapps.com/ytcatbavac/public_html/ankit-test/
