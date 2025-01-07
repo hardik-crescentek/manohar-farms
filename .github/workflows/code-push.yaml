@@ -14,12 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: copy file via ssh password
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: 45.76.134.183
-          username: faruk
-          password: 1c!Y3S5E!4$w
-          port: 22
-          source: "./"
-          target: /home/1098524.cloudwaysapps.com/ytcatbavac/public_html/ankit-test/
+      - name: scp command
+        run: |
+          sudo apt-get install -y sshpass
+          sshpass -p "1c!Y3S5E!4$w" scp -r faruk@45.76.134.183:./ /home/1098524.cloudwaysapps.com/ytcatbavac/public_html/ankit-test/
