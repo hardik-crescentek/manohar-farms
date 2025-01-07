@@ -1,0 +1,29 @@
+name: Deploy to Shared Hosting
+
+on:
+  push:
+    branches:
+      - ankit-test # Trigger on push to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Install sshpass to handle password-based SSH
+      - name: Install sshpass
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+
+      # Deploy code using sshpass and rsync
+      - name: Deploy with rsync
+        # env:
+        #   SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+        #   SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+        run: |
+          sshpass -p "1c!Y3S5E!4$w" rsync -avz --delete ./ faruk@45.76.134.183:/home/1098524.cloudwaysapps.com/ytcatbavac/public_html/ankit-test/
