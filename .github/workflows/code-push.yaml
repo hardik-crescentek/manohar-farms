@@ -14,22 +14,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Install sshpass to handle password-based SSH
-      # - name: copy file via ssh password
-      #   uses: appleboy/scp-action@v0.1.7
-      #   with:
-      #     host: 45.76.134.183
-      #     username: faruk
-      #     password: 1c!Y3S5E!4$w
-      #     port: 22
-      #     source: "./"
-      #     target: /home/1098524.cloudwaysapps.com/ytcatbavac/public_html/ankit-test/
-
-      - name: Copy folder content recursively to remote
-        uses: garygrossgarten/github-action-scp@release
+      - name: copy file via ssh password
+        uses: appleboy/scp-action@v0.1.7
         with:
-          local: ./
-          remote: /home/1098524.cloudwaysapps.com/ytcatbavac/public_html/ankit-test/
           host: 45.76.134.183
           username: faruk
           password: 1c!Y3S5E!4$w
+          port: 22
+          source: "./"
+          target: /home/1098524.cloudwaysapps.com/ytcatbavac/public_html/ankit-test/
