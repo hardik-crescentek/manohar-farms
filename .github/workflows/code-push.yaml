@@ -20,4 +20,7 @@ jobs:
 
       - name: scp command
         run: |
+          mkdir -p ~/.ssh
+          echo "StrictHostKeyChecking no" >> ~/.ssh/config
+          echo "UserKnownHostsFile=/dev/null" >> ~/.ssh/config
           sshpass -p "1c!Y3S5E!4$w" scp -r faruk@45.76.134.183:./ /home/1098524.cloudwaysapps.com/ytcatbavac/public_html/ankit-test/
