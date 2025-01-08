@@ -239,6 +239,11 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('reports/get-table', [ReportsController::class, 'getExpenseTable'])->name('expenses-reports.get-table');
     Route::post('reports/generate-expenses-pdf', [ReportsController::class, 'generateExpensesPdf'])->name('expenses-reports.generate-pdf');
 
+    // Total system Expenses
+    Route::get('reports/total/expenses', [ReportsController::class, 'TotalexpensesIndex'])->name('total-expenses-reports.index');
+    Route::post('reports/total/get-table', [ReportsController::class, 'getTotalExpenseTable'])->name('total-expenses-reports.get-table');
+    Route::post('reports/total/generate-expenses-pdf', [ReportsController::class, 'generateTotalExpensesPdf'])->name('total-expenses-reports.generate-pdf');
+
     Route::get('reports/water', [ReportsController::class, 'waterIndex'])->name('water-reports.index');
     Route::post('water/get-table', [ReportsController::class, 'getWaterTable'])->name('water-reports.get-table');
     Route::post('water/generate-water-pdf', [ReportsController::class, 'generateWaterPdf'])->name('water-reports.generate-pdf');

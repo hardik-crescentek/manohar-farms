@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Bill;
+use App\Models\Camera;
 use App\Models\Diesel;
 use App\Models\DieselEntry;
 use App\Models\Expense;
@@ -19,6 +20,7 @@ use App\Models\Vehicle;
 use App\Models\VehicleService;
 use App\Models\Water;
 use App\Models\WaterEntry;
+use Carbon\Carbon;
 use PDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
@@ -129,6 +131,204 @@ class ReportsController extends Controller
         $pdf = PDF::loadView('reports.Pdf.expenses', $data);
 
         return $pdf->download('expenses.pdf');
+    }
+
+    //Total System Expenses
+    public function TotalexpensesIndex(Request $request)
+    {
+        // Summing up expenses for all models
+        $models = [
+            'Plants' => Plant::sum('price'),
+            'Water Expenses' => Water::sum('price'),
+            'Diesel' => Diesel::sum('total_price'),
+            'Diesel Entries' => DieselEntry::sum('amount'),
+            'Staff Salaries' => Staff::sum('salary'),
+            'Vehicle Services' => VehicleService::sum('price'),
+            'Bills' => Bill::where('status', 'paid')->sum('amount'),
+            'Infrastructure' => Infrastructure::sum('amount'),
+            'Cameras' => Camera::sum('amount'),
+            'Fertilizer & Pesticides' => FertilizerPesticide::sum('price'),
+            'Expenses' => Expense::sum('amount'),
+        ];
+
+        // Calculate total, current month, previous month, and current year expenses
+        $totalExpense = array_sum($models); // Total expenses for all models
+
+        // Current month expenses
+        $currentMonthExpense = $this->getTotalMonthlyExpense(date('m'));
+
+        // Previous month expenses
+        $prevMonth = date('m') - 1;
+        $prevMonthExpense = $this->getTotalMonthlyExpense($prevMonth);
+
+        // Current year expenses
+        $currentYearExpense = $this->getTotalYearlyExpense(date('Y'));
+
+        // Return data to the view
+        return view('reports.totalexpenses', compact('totalExpense', 'currentMonthExpense', 'prevMonthExpense', 'currentYearExpense'));
+    }
+
+    private function getTotalMonthlyExpense($month)
+    {
+        return Plant::whereMonth('created_at', $month)->sum('price') +
+            Water::whereMonth('created_at', $month)->sum('price') +
+            Diesel::whereMonth('created_at', $month)->sum('total_price') +
+            DieselEntry::whereMonth('created_at', $month)->sum('amount') +
+            Staff::whereMonth('created_at', $month)->sum('salary') +
+            VehicleService::whereMonth('created_at', $month)->sum('price') +
+            Bill::where('status', 'paid')->whereMonth('created_at', $month)->sum('amount') +
+            Infrastructure::whereMonth('created_at', $month)->sum('amount') +
+            Camera::whereMonth('created_at', $month)->sum('amount') +
+            FertilizerPesticide::whereMonth('created_at', $month)->sum('price') +
+            Expense::whereMonth('date', $month)->sum('amount');
+    }
+
+    private function getTotalYearlyExpense($year)
+    {
+        return Plant::whereYear('created_at', $year)->sum('price') +
+            Water::whereYear('created_at', $year)->sum('price') +
+            Diesel::whereYear('created_at', $year)->sum('total_price') +
+            DieselEntry::whereYear('created_at', $year)->sum('amount') +
+            Staff::whereYear('created_at', $year)->sum('salary') +
+            VehicleService::whereYear('created_at', $year)->sum('price') +
+            Bill::where('status', 'paid')->whereYear('created_at', $year)->sum('amount') +
+            Infrastructure::whereYear('created_at', $year)->sum('amount') +
+            Camera::whereYear('created_at', $year)->sum('amount') +
+            FertilizerPesticide::whereYear('created_at', $year)->sum('price') +
+            Expense::whereYear('date', $year)->sum('amount');
+    }
+
+    public function getTotalExpenseTable(Request $request)
+    {
+        // Initialize data array
+        $data = [];
+
+        // Handle date range filter
+        $startDate = $request->startDate;
+        $endDate = $request->endDate;
+
+        // Initialize default query for each model
+        $models = [
+            'Plants' => Plant::query(),
+            'Water Expenses' => Water::query(),
+            'Diesel' => Diesel::query(),
+            'Diesel Entries' => DieselEntry::query(),
+            'Staff Salaries' => Staff::query(),
+            'Vehicle Services' => VehicleService::query(),
+            'Bills' => Bill::where('status', 'paid'),
+            'Infrastructure' => Infrastructure::query(),
+            'Cameras' => Camera::query(),
+            'Fertilizer & Pesticides' => FertilizerPesticide::query(),
+            'Expenses' => Expense::query(),
+        ];
+
+        // Apply date filter if provided
+        if ($startDate && $endDate) {
+            $startDate = Carbon::parse($startDate)->startOfDay();
+            $endDate = Carbon::parse($endDate)->endOfDay();
+
+            foreach ($models as $key => $query) {
+                // Adjust field for date filtering
+                $field = ($key === 'Expenses' || $key === 'Diesel') ? 'date' : 'created_at';
+                $models[$key] = $query->whereBetween($field, [$startDate, $endDate]);
+            }
+        }
+
+        // Calculate totals
+        $totals = [];
+        foreach ($models as $key => $query) {
+            // Adjust sum field for each model
+            $sumField = match ($key) {
+                'Plants', 'Water Expenses', 'Fertilizer & Pesticides' => 'price',
+                'Diesel' => 'total_price',
+                'Diesel Entries' => 'amount',
+                'Staff Salaries' => 'salary',
+                'Vehicle Services' => 'price',
+                'Infrastructure', 'Cameras' => 'amount',
+                'Bills' => 'amount',
+                'Expenses' => 'amount',
+            };
+
+            $totals[$key] = $query->sum($sumField);
+        }
+
+        // Prepare data for rendering
+        $data['headers'] = array_keys($totals);
+        $data['expenses'] = array_values($totals);
+
+        return view('reports.Ajax.totalexpenses', $data);
+    }
+
+    public function generateTotalExpensesPdf(Request $request)
+    {
+        // Initialize date range variables
+        $reportrange = $request->reportrange;
+        $startDate = null;
+        $endDate = null;
+
+        if ($reportrange != '') {
+            $reportrangeAr = explode(' - ', $reportrange);
+            $startDate = $reportrangeAr[0];
+            $endDate = $reportrangeAr[1];
+        }
+
+        // Prepare the query and totals for each category
+        $models = [
+            'Plants' => Plant::query(),
+            'Water Expenses' => Water::query(),
+            'Diesel' => Diesel::query(),
+            'Diesel Entries' => DieselEntry::query(),
+            'Staff Salaries' => Staff::query(),
+            'Vehicle Services' => VehicleService::query(),
+            'Bills' => Bill::where('status', 'paid'),
+            'Infrastructure' => Infrastructure::query(),
+            'Cameras' => Camera::query(),
+            'Fertilizer & Pesticides' => FertilizerPesticide::query(),
+            'Expenses' => Expense::query(),
+        ];
+
+        // Apply date filter if provided
+        if ($startDate && $endDate) {
+            $startDate = Carbon::parse($startDate)->startOfDay();
+            $endDate = Carbon::parse($endDate)->endOfDay();
+
+            foreach ($models as $key => $query) {
+                $field = ($key === 'Expenses' || $key === 'Diesel') ? 'date' : 'created_at';
+                $models[$key] = $query->whereBetween($field, [$startDate, $endDate]);
+            }
+        }
+
+        // Calculate totals
+        $totals = [];
+        foreach ($models as $key => $query) {
+            $sumField = match ($key) {
+                'Plants', 'Water Expenses', 'Fertilizer & Pesticides' => 'price',
+                'Diesel' => 'total_price',
+                'Diesel Entries' => 'amount',
+                'Staff Salaries' => 'salary',
+                'Vehicle Services' => 'price',
+                'Infrastructure', 'Cameras' => 'amount',
+                'Bills' => 'amount',
+                'Expenses' => 'amount',
+            };
+
+            $totals[$key] = $query->sum($sumField);
+        }
+
+        // Calculate the overall total expenses
+        $total = array_sum($totals);
+
+        // Prepare the data for the PDF view
+        $data = [
+            'totals' => $totals,
+            'from' => isset($startDate) ? $startDate->format('d-m-Y') : null,
+            'to' => isset($endDate) ? $endDate->format('d-m-Y') : null,
+            'total' => $total,
+        ];
+
+        // Generate and download the PDF
+        $pdf = PDF::loadView('reports.Pdf.totalexpenses', $data);
+        return $pdf->download('total_expenses_report.pdf');
     }
 
 
@@ -979,7 +1179,7 @@ class ReportsController extends Controller
             $total = $entries->sum('volume'); // Adjust as per requirement
         } elseif ($category === 'fertilizer') {
             $total = $entries->sum('quantity'); // Adjust as per requirement
-        }else{
+        } else {
             $total = $entries->sum('size');
         }
 

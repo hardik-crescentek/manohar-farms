@@ -283,6 +283,10 @@ $routeName = request()->route()->getName();
                             class="sidemenu-icon" alt=""><span class="sidemenu-label">Reports</span></a>
                     <ul class="nav-sub">
 
+                        <li class="nav-sub-item {{ $routeName == 'total-expenses-reports.index' ? 'active' : '' }}">
+                            <a class="nav-sub-link" href="{{ route('total-expenses-reports.index') }}">Total System Expenses</a>
+                        </li>
+
                         <li class="nav-sub-item {{ $routeName == 'reports.index' ? 'active' : '' }}">
                             <a class="nav-sub-link" href="{{ route('reports.index') }}">Reports</a>
                         </li>

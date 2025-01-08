@@ -1,11 +1,11 @@
 @extends('layouts-verticalmenu-light.master')
 @section('css')
 @endsection
-
 @section('content')
     <!-- Page Header -->
     <div class="page-header">
         <div>
+            <h2 class="main-content-title tx-24 mg-b-5">Edit Plant</h2>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
                 <li class="breadcrumb-item"><a href="{{ route('plants.index') }}">Plants</a></li>
@@ -21,7 +21,7 @@
             <div class="card custom-card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-2">
-                        <h6 class="main-content-label">Edit Plant</h6>
+                        <h6 class="main-content-label">Plant Details</h6>
                     </div>
                     <form class="parsley-validate" method="post" action="{{ route('plants.update', $plant->id) }}"
                         enctype="multipart/form-data">
@@ -32,15 +32,15 @@
                                 <div class="form-group">
                                     <label>Image</label>
                                     <input class="form-control" name="image" type="file" accept="image/*">
-                                    <small class="text-muted">Current Image:</small>
-                                    <div style="margin-top: 10px;">
-                                        <img src="{{ asset('uploads/plants/' . $plant->image) }}" alt="Image Preview"
-                                            style="max-width: 150px; max-height: 150px; object-fit: contain;">
-                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div>
+                                    <img src="{{ asset('uploads/plants/' . $plant->image) }}" alt="" width="150">
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Name <span class="text-danger">*</span></label>
                                     <input class="form-control" name="name" required type="text"
@@ -53,7 +53,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Location</label>
                                     <input class="form-control" name="location" type="text"
@@ -61,7 +61,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Area</label>
                                     <input class="form-control" name="area" type="text"
@@ -69,7 +69,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Quantity <span class="text-danger">*</span></label>
                                     <input class="form-control" name="quantity" required type="text"
@@ -82,7 +82,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Price <span class="text-danger">*</span></label>
                                     <input class="form-control" name="price" required type="text"
@@ -95,8 +95,7 @@
                                 </div>
                             </div>
 
-
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Nursery</label>
                                     <input class="form-control" name="nursery" type="text"
@@ -119,6 +118,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="row row-sm mt-4">
                             <div class="col-md-12">
                                 <a href="{{ route('plants.index') }}" class="btn btn-primary">Back</a>
@@ -146,7 +146,6 @@
                 dateFormat: "yy-mm-dd"
             });
 
-            // Set existing date
             $('.datepicker').datepicker("setDate", new Date('{{ date('Y-m-d', strtotime($plant->date)) }}'));
         });
     </script>

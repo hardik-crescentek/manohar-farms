@@ -82,7 +82,6 @@
                                 </select> -->
                                 <select class="form-control select2" name="service_cycle_type" id="service_cycle_type">
                                     <option value="">Select Service Types</option>
-                                    @dump($serviceTypes)
                                     @if(isset($serviceTypes) && !empty($serviceTypes))
                                         @foreach($serviceTypes as $id => $name)
                                             <option value="{{ $id }}" {{ $vehicle->service_cycle_type != null && $vehicle->service_cycle_type == $id ? 'selected' : '' }}>{{ $name }}</option>
